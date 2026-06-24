@@ -10,7 +10,7 @@ st.set_page_config(
     initial_sidebar_state="expanded"
 )
 
-# ส่วนหัวระบบ: ถอดการล็อกรหัสสีออก เพื่อให้รองรับโหมดมืด (ข้อความจะเปลี่ยนเป็นสีขาวอัตโนมัติ)
+# ส่วนหัวระบบ (ตัวหนังสือจะเปลี่ยนสีอัตโนมัติตามโหมดมืด/สว่าง)
 st.markdown("""
     <h2 style='text-align: left; font-weight: 600; font-family: sans-serif; margin-bottom: 5px;'>
         CCTV Monitor & Behavior Analysis System
@@ -25,7 +25,7 @@ def load_model():
 
 model = load_model()
 
-# กำหนดค่ากล้องทั้งหมดในระบบ
+# รายการกล้องวงจรปิดในระบบ
 CAM_SOURCES = {
     "CAM 01": {"source": 0, "name": "โซนเคาน์เตอร์ชำระเงิน"},
     "CAM 02": {"source": 1, "name": "โซนชั้นวางสินค้า A"},
@@ -33,45 +33,54 @@ CAM_SOURCES = {
     "CAM 04": {"source": 3, "name": "โซนประตูทางเข้า-ออก"}
 }
 
-# --- การจัดการสถานะปุ่มกดสลับมุมมอง (Toggle States) ---
-# กำหนดค่าเริ่มต้นให้กับมุมมองกล้อง หากยังไม่มีในระบบความจำ (Session State)
+# กำหนดสถานะเริ่มต้นให้กับมุมมองกล้อง
 if "view_mode" not in st.session_state:
-    st.session_state.view_mode = "แสดงกล้องทั้งหมด (Grid 2x2)"
+    st.session_state.view_mode = "Grid 2x2"
 
 # --- แถบควบคุมด้านซ้าย (Sidebar) ---
 st.sidebar.markdown("### แผงควบคุมระบบ")
 
-# ใช้สวิตช์เปิด/ปิดแบบเรียบหรูสไตล์มินิมอลแทน Checkbox เดิม
+# สวิตช์หลักสำหรับเปิดทำงานระบบ
 run_system = st.sidebar.toggle("เปิดการทำงานของระบบ", value=False)
 
 st.sidebar.markdown("---")
-st.sidebar.markdown("#### เลือกมุมมองกล้อง")
+st.sidebar.markdown("#### มุมมองกล้อง")
 
-# รายการเมนูทั้งหมดที่ผู้ใช้สามารถกดเลือกได้
-view_options = ["แสดงกล้องทั้งหมด (Grid 2x2)"] + list(CAM_SOURCES.keys())
+# 1. ปุ่มสำหรับดูภาพรวม 4 กล้องพร้อมกัน (เต็มความกว้างของแถบข้าง)
+is_grid_active = (st.session_state.view_mode == "Grid 2x2")
+if st.sidebar.button("Grid 2x2", type="primary" if is_grid_active else "secondary", use_container_width=True):
+    st.session_state.view_mode = "Grid 2x2"
+    st.rerun()
 
-# วนลูปสร้างปุ่มกดแบบ Toggle State แทนเมนู Radio
-for option in view_options:
-    # ตรวจสอบว่าปุ่มนี้คือปุ่มที่กำลังใช้งานอยู่หรือไม่
-    is_active = (st.session_state.view_mode == option)
-    
-    # ถ้าเป็นปุ่มที่กำลังเปิดอยู่ ให้ใช้สีเด่น (primary) ถ้าไม่ใช่ให้ใช้สีพื้นฐาน (secondary)
-    if st.sidebar.button(
-        option, 
-        type="primary" if is_active else "secondary", 
-        use_container_width=True
-    ):
-        st.session_state.view_mode = option
-        st.rerun() # สั่งรีเฟรชหน้าเว็บทันทีเพื่อให้เปลี่ยนโหมดมุมกล้องนิ่งและเสถียรขึ้น
+# 2. ย่อขนาดปุ่มเลือกกล้องเดี่ยวโดยแบ่งเป็น 2 คอลัมน์เล็กๆ ซ้าย-ขวา เพื่อประหยัดพื้นที่
+c_col1, c_col2 = st.sidebar.columns(2)
+
+with c_col1:
+    if st.button("CAM 01", type="primary" if st.session_state.view_mode == "CAM 01" else "secondary", use_container_width=True):
+        st.session_state.view_mode = "CAM 01"
+        st.rerun()
+    if st.button("CAM 03", type="primary" if st.session_state.view_mode == "CAM 03" else "secondary", use_container_width=True):
+        st.session_state.view_mode = "CAM 03"
+        st.rerun()
+
+with c_col2:
+    if st.button("CAM 02", type="primary" if st.session_state.view_mode == "CAM 02" else "secondary", use_container_width=True):
+        st.session_state.view_mode = "CAM 02"
+        st.rerun()
+    if st.button("CAM 04", type="primary" if st.session_state.view_mode == "CAM 04" else "secondary", use_container_width=True):
+        st.session_state.view_mode = "CAM 04"
+        st.rerun()
 
 st.sidebar.markdown("---")
-st.sidebar.markdown("#### บันทึกเหตุการณ์ระบบ")
+st.sidebar.markdown("#### บันทึกเหตุการณ์ระบบ (System Logs)")
 
-# บันทึกสถานะใช้ตารางโค้ดดั้งเดิม เพื่อให้ตัวหนังสือเปลี่ยนสีตามโหมดมืด/สว่างได้สมบูรณ์แบบ
+# ขยายพื้นที่แสดง Log ให้กว้าง เต็มตา และเพิ่มข้อมูลจำลองให้ดูเป็นทางการขึ้น
 log_text = (
-    "[14:22:10] SYSTEM - เริ่มต้นการเชื่อมต่อกล้อง\n"
-    "[14:22:12] CAM 01 - ตรวจพบพฤติกรรมเสี่ยง [ALERT]\n"
-    "[14:22:15] CAM 02 - ตรวจพบการหยิบสินค้าปกติ"
+    "[14:22:10] SYSTEM - Connected to 4 Cameras\n"
+    "[14:22:12] CAM 01 - Suspicious Behavior [ALERT]\n"
+    "[14:22:15] CAM 02 - Normal activity detected\n"
+    "[14:24:02] CAM 01 - Score updated: 3/5\n"
+    "[14:25:11] CAM 03 - Normal activity detected"
 )
 st.sidebar.code(log_text, language="bash")
 
@@ -80,17 +89,14 @@ st.sidebar.code(log_text, language="bash")
 view_mode = st.session_state.view_mode
 
 if run_system:
-    # เริ่มต้นเชื่อมต่อกล้องทุกตัว
     caps = {}
     for cam_id, config in CAM_SOURCES.items():
         caps[cam_id] = cv2.VideoCapture(config["source"])
 
-    # สร้างบล็อกจองพื้นที่แสดงผลภาพวิดีโอ
     frame_places = {}
     score_places = {}
 
-    if view_mode == "แสดงกล้องทั้งหมด (Grid 2x2)":
-        # จัด Layout หน้าจอเป็น 2 แถว แถวละ 2 คอลัมน์
+    if view_mode == "Grid 2x2":
         row1_col1, row1_col2 = st.columns(2)
         row2_col1, row2_col2 = st.columns(2)
         
@@ -101,52 +107,40 @@ if run_system:
                 frame_places[cam_id] = st.empty()
                 score_places[cam_id] = st.empty()
     else:
-        # มุมมองขยายแบบกล้องตัวเดียวเต็ม ๆ จอ
         st.markdown(f"### มุมมองขยาย: {view_mode} ({CAM_SOURCES[view_mode]['name']})")
         frame_places[view_mode] = st.empty()
         score_places[view_mode] = st.empty()
 
 
-    # ลูปหลักในการดึงเฟรมภาพมาแสดงผลแบบเรียลไทม์
+    # ลูปทำงานหลัก
     while True:
         for cam_id, cap in caps.items():
-            # ข้ามการประมวลผลกล้องตัวอื่น หากอยู่ในโหมดขยายกล้องเดี่ยวเพื่อประหยัด CPU
-            if view_mode != "แสดงกล้องทั้งหมด (Grid 2x2)" and cam_id != view_mode:
+            if view_mode != "Grid 2x2" and cam_id != view_mode:
                 continue
 
             success, frame = cap.read()
 
             if not success:
-                # สร้างหน้าจอออฟไลน์สีเทา (ปรับขนาดให้เล็กลงเพื่อบีบหน้าจอไม่ให้เกิดการ Scroll)
                 frame_out = np.ones((270, 480, 3), dtype=np.uint8) * 230
                 cv2.putText(frame_out, f"{cam_id} OFFLINE", (140, 140), cv2.FONT_HERSHEY_SIMPLEX, 0.6, (148, 163, 184), 2)
                 risk_text = "สถานะ: ไม่สามารถเชื่อมต่อได้"
             else:
-                # หากดึงภาพสำเร็จ ส่งเข้าโมเดล AI
                 results = model(frame)
                 frame_out = results[0].plot()
-                
-                # **จุดสำคัญ:** ทำการบีบย่อขนาดภาพ (Resize) เป็น 480x270 พิกเซล 
-                # เพื่อให้ภาพทั้ง 4 ช่องกระชับ รวมกันแล้วแสดงผลครบภายใน 1 หน้าจอพอดีโดยไม่ต้องเลื่อนลง
-                frame_out = cv2.resize(frame_out, (480, 270))
+                frame_out = cv2.resize(frame_out, (480, 270)) # บีบสัดส่วนป้องกันการเกิด Scroll bar
                 risk_text = "ดัชนีความเสี่ยงพฤติกรรม: 0 / 5 (ปกติ)"
 
-            # แปลงระบบสีภาพให้ถูกต้องสำหรับขึ้นหน้าเว็บ
             frame_rgb = cv2.cvtColor(frame_out, cv2.COLOR_BGR2RGB)
 
-            # อัปเดตภาพขึ้นบนหน้าจอ UI
             if cam_id in frame_places:
                 frame_places[cam_id].image(frame_rgb, channels="RGB", use_container_width=True)
-                score_places[cam_id].caption(risk_text) # ใช้ st.caption เพื่อให้ตัวหนังสือปรับสีตามโหมดมืดอัตโนมัติ
+                score_places[cam_id].caption(risk_text)
 
-        # ดักจับกรณีผู้ใช้ปิดสวิตช์ระบบที่แถบข้างเพื่อหยุดลูปการทำงาน
         if not run_system:
             break
 
-    # ปิดตัวจับภาพและคืนทรัพยากรให้คอมพิวเตอร์
     for cap in caps.values():
         cap.release()
 
 else:
-    # ข้อความต้อนรับเริ่มต้น (ปรับสีข้อความอัตโนมัติตามโหมดมืด/สว่าง)
     st.markdown("ระบบพร้อมใช้งาน กรุณากดเปิดสวิตช์ที่แผงควบคุมด้านซ้ายเพื่อเริ่มต้นมอนิเตอร์กล้องวงจรปิด")
