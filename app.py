@@ -1,139 +1,133 @@
 import streamlit as st
 import cv2
-import numpy as np
 from ultralytics import YOLO
-import time
+import numpy as np
 
-# 1. ตั้งค่าหน้าเว็บให้เป็นแบบเต็มจอ (Wide) และเปลี่ยนชื่อแท็บ
-st.set_page_config(page_title="CCTV Loss Prevention System", layout="wide")
+# ตั้งค่าหน้าเว็บแบบกว้างและใช้โครงสร้างที่สะอาดตา
+st.set_page_config(
+    page_title="CCTV Control Center", 
+    layout="wide", 
+    initial_sidebar_state="expanded"
+)
 
-# ตกแต่งสไตล์ CSS ให้ดูเหมือนหน้าจอ CCTV จริงๆ (โทนสีเข้ม)
+# ส่วนหัวของระบบ (ใช้ฟอนต์แนว Sans-serif และสีโทนเข้มสุภาพ)
 st.markdown("""
-    <style>
-    .stApp { background-color: #0B0E14; color: #E0E6ED; }
-    .status-card {
-        background-color: #1A1F2C; padding: 15px; border-radius: 8px;
-        border-left: 5px solid #00E676; margin-bottom: 10px;
-    }
-    .alert-card {
-        background-color: #2C1A1A; padding: 15px; border-radius: 8px;
-        border-left: 5px solid #FF1744; margin-bottom: 10px;
-    }
-    </style>
+    <h2 style='text-align: left; color: #1E293B; font-weight: 600; font-family: sans-serif; margin-bottom: 5px;'>
+        ระบบควบคุมกล้องวงจรปิด (CCTV Control Center)
+    </h2>
+    <div style='border-bottom: 2px solid #E2E8F0; margin-bottom: 25px;'></div>
 """, unsafe_allow_html=True)
 
-st.title("📹 ระบบห้องควบคุมกล้องวงจรปิดอัจฉริยะ (AI CCTV Control Room)")
-st.caption("ระบบตรวจจับพฤติกรรมเสี่ยงต่อการซ่อนสินค้าด้วย Deep Learning สำหรับกล้องหลายตัว")
-
-# 2. โหลดโมเดล YOLO
+# โหลดโมเดลสำหรับประมวลผล
 @st.cache_resource
 def load_model():
-    return YOLO('yolov8n.pt')  # เปลี่ยนเป็น Path โมเดลของคุณ เช่น 'best.pt'
+    return YOLO('yolov8n.pt')
 
 model = load_model()
 
-# 3. เมนูด้านข้าง (Sidebar) สำหรับควบคุมระบบ
-st.sidebar.header("🕹️ แผงควบคุมกล้อง")
-run_system = st.sidebar.checkbox("เริ่มต้นทำงานระบบ (Start CCTV)", value=False)
+# --- แถบควบคุมด้านซ้าย (Sidebar) ---
+st.sidebar.markdown("<h3 style='color: #1E293B; font-weight: 500; font-size: 18px;'>แผงควบคุมระบบ</h3>", unsafe_allow_html=True)
 
-st.sidebar.markdown("---")
+# 1. ปุ่มสวิตช์เปิด/ปิดระบบแบบเรียบๆ
+run_system = st.sidebar.checkbox("เปิดการทำงานของระบบ", value=False)
+
+# 2. เมนูเลือกมุมมองกล้อง
 view_mode = st.sidebar.radio(
-    "🖥️ รูปแบบการแสดงผล (Layout Mode)",
-    ["ดูมุมกล้องรวม (Grid View)", "เลือกสลับมุมกล้อง (Single View)"]
+    "เลือกมุมมองกล้อง",
+    ["แสดงกล้องทั้งหมด (Grid 2x1)", "กล้อง 1: โซนเคาน์เตอร์", "กล้อง 2: โซนชั้นวางสินค้า"]
 )
 
-# ตัวเลือกสำหรับโหมดสลับมุมกล้อง
-selected_cam = "ทั้งหมด"
-if view_mode == "เลือกสลับมุมกล้อง (Single View)":
-    selected_cam = st.sidebar.selectbox("เลือกกล้องที่ต้องการดู", ["กล้องตัวที่ 1 (หน้าเคาน์เตอร์)", "กล้องตัวที่ 2 (ชั้นวางสินค้า)"])
+st.sidebar.markdown("<div style='border-bottom: 1px solid #E2E8F0; margin: 25px 0;'></div>", unsafe_allow_html=True)
+st.sidebar.markdown("<h4 style='color: #1E293B; font-weight: 500; font-size: 15px;'>บันทึกเหตุการณ์ล่าสุด</h4>", unsafe_allow_html=True)
 
-# จำลองตารางคะแนนความเสี่ยงของแต่ละกล้อง
-cam1_score = 0
-cam2_score = 0
+# ส่วนแสดง Log เหตุการณ์ในสไตล์ Terminal/Monospace สีดาร์กเกรย์ เรียบง่ายและเป็นทางการ
+st.sidebar.markdown("""
+    <div style='font-family: monospace; font-size: 12px; color: #475569; background-color: #F8FAFC; padding: 10px; border-radius: 4px; border: 1px solid #E2E8F0;'>
+        [12:31:05] CAM 01 - พฤติกรรมต้องสงสัย <span style='color: #DC2626; font-weight: bold;'>[ALERT]</span><br>
+        [12:15:20] CAM 02 - ตรวจพบการหยิบสินค้าปกติ<br>
+        [12:02:44] CAM 01 - ตรวจพบการหยิบสินค้าปกติ
+    </div>
+""", unsafe_allow_html=True)
 
-# 4. ส่วนแสดงฟีดวิดีโอ (Main Panel)
-st.subheader("🖥️ หน้าจอหลักแสดงภาพจากกล้องวงจรปิด")
 
-# สร้างพื้นที่ว่าง (Placeholder) ไว้สำหรับสลับการแสดงผลตามโหมดที่เลือก
-video_area = st.empty()
-
-# ส่วนแสดงสถานะและการแจ้งเตือนด้านล่างหน้าจอ
-st.markdown("---")
-col_stat1, col_stat2 = st.columns(2)
-
-with col_stat1:
-    st.markdown('<div class="status-card">🟢 <b>สถานะระบบ:</b> กำลังเฝ้าระวังปกติ</div>', unsafe_allow_html=True)
-with col_stat2:
-    alert_box = st.empty() # พื้นที่สำหรับแจ้งเตือนสีแดงเมื่อเจอขโมย
-
-# 5. ลอจิกการเปิดกล้อง 2 ตัวพร้อมกัน
+# --- พื้นที่มอนิเตอร์หลัก (Main Monitor Area) ---
 if run_system:
-    # สำหรับการใช้งานจริง:
-    # cap1 = cv2.VideoCapture(0) # กล้องตัวที่ 1 (Webcam เครื่อง)
-    # cap2 = cv2.VideoCapture(1) # กล้องตัวที่ 2 (กล้องต่อแยกภายนอก)
-    
-    # 💡 ข้อแนะนำสำหรับการทดสอบ (ถ้ามีกล้องตัวเดียว): 
-    # ให้กล้องตัวแรกเป็นกล้องจริง (0) และกล้องตัวที่สองเป็นไฟล์วิดีโอตัวอย่างแทนได้ครับ
-    cap1 = cv2.VideoCapture(0)
-    cap2 = cv2.VideoCapture("ใส่_path_ไฟล์วิดีโอทดสอบ.mp4") # หากไม่มีกล้องตัวที่ 2 ให้ระบุไฟล์วิดีโอแทน
+    # เริ่มดึงข้อมูลจาก Source กล้อง (สามารถเปลี่ยนเลขเป็นพาร์ทวิดีโอได้)
+    cap1 = cv2.VideoCapture(0)  
+    cap2 = cv2.VideoCapture(1)  
 
+    # จัดหน้าตา Layout ตามโหมดที่ผู้ใช้เลือก
+    if view_mode == "แสดงกล้องทั้งหมด (Grid 2x1)":
+        col1, col2 = st.columns(2)
+        with col1:
+            st.markdown("<p style='font-weight: 500; color: #475569; margin-bottom: 5px; font-size: 14px;'>CAM 01: โซนเคาน์เตอร์</p>", unsafe_allow_html=True)
+            frame_place1 = st.empty()
+            score_place1 = st.empty()
+        with col2:
+            st.markdown("<p style='font-weight: 500; color: #475569; margin-bottom: 5px; font-size: 14px;'>CAM 02: โซนชั้นวางสินค้า</p>", unsafe_allow_html=True)
+            frame_place2 = st.empty()
+            score_place2 = st.empty()
+
+    elif view_mode == "กล้อง 1: โซนเคาน์เตอร์":
+        st.markdown("<p style='font-weight: 500; color: #475569; margin-bottom: 5px; font-size: 14px;'>มุมมองขยาย: CAM 01 (โซนเคาน์เตอร์)</p>", unsafe_allow_html=True)
+        frame_place_single = st.empty()
+        score_place_single = st.empty()
+
+    elif view_mode == "กล้อง 2: โซนชั้นวางสินค้า":
+        st.markdown("<p style='font-weight: 500; color: #475569; margin-bottom: 5px; font-size: 14px;'>มุมมองขยาย: CAM 02 (โซนชั้นวางสินค้า)</p>", unsafe_allow_html=True)
+        frame_place_single = st.empty()
+        score_place_single = st.empty()
+
+
+    # ลูปหลักในการดึงเฟรมภาพมาแสดงผล
     while cap1.isOpened() or cap2.isOpened():
-        ret1, frame1 = cap1.read()
-        ret2, frame2 = cap2.read()
+        success1, frame1 = cap1.read()
+        success2, frame2 = cap2.read()
 
-        # สร้างเฟรมสีดำเปล่าๆ เผื่อกรณีกล้องตัวใดตัวหนึ่งเปิดไม่ได้ โค้ดจะได้ไม่พัง
-        if not ret1:
-            frame1 = np.zeros((480, 640, 3), dtype=np.uint8)
-            cv2.putText(frame1, "Camera 1 Disconnected", (50, 240), cv2.FONT_HERSHEY_SIMPLEX, 1, (0, 0, 255), 2)
-        if not ret2:
-            frame2 = np.zeros((480, 640, 3), dtype=np.uint8)
-            cv2.putText(frame2, "Camera 2 Disconnected", (50, 240), cv2.FONT_HERSHEY_SIMPLEX, 1, (0, 0, 255), 2)
+        # กรณีกล้องไม่ทำงาน ให้ขึ้นหน้าจอออฟไลน์สีเทาแทนสีดำฉูดฉาด
+        if not success1:
+            frame1 = np.ones((480, 640, 3), dtype=np.uint8) * 240 # หน้าจอสีเทาอ่อน
+            cv2.putText(frame1, "CAMERA 01 OFFLINE", (160, 250), cv2.FONT_HERSHEY_SIMPLEX, 0.7, (148, 163, 184), 2)
+        if not success2:
+            frame2 = np.ones((480, 640, 3), dtype=np.uint8) * 240
+            cv2.putText(frame2, "CAMERA 02 OFFLINE", (160, 250), cv2.FONT_HERSHEY_SIMPLEX, 0.7, (148, 163, 184), 2)
 
-        # ส่งเฟรมไปประมวลผลด้วย YOLO (ถ้ากล้องทำงานปกติ)
-        if ret1:
-            res1 = model(frame1, verbose=False)
-            frame1 = res1[0].plot()
-            # เขียนข้อความกำกับหัวมุมภาพให้เหมือน CCTV
-            cv2.putText(frame1, f"CAM 01 - FRONT COUNTER | {time.strftime('%H:%M:%S')}", (10, 30), cv2.FONT_HERSHEY_SIMPLEX, 0.6, (0, 255, 0), 2)
-
-        if ret2:
-            res2 = model(frame2, verbose=False)
-            frame2 = res2[0].plot()
-            cv2.putText(frame2, f"CAM 02 - PRODUCT SHELF | {time.strftime('%H:%M:%S')}", (10, 30), cv2.FONT_HERSHEY_SIMPLEX, 0.6, (0, 255, 0), 2)
-
-        # แปลงสี BGR เป็น RGB สำหรับ Streamlit
-        frame1_rgb = cv2.cvtColor(frame1, cv2.COLOR_BGR2RGB)
-        frame2_rgb = cv2.cvtColor(frame2, cv2.COLOR_BGR2RGB)
-
-        # 6. อัปเดตหน้าจอตามโหมดการแสดงผลที่ผู้ใช้เลือกใน Sidebar
-        with video_area.container():
-            if view_mode == "ดูมุมกล้องรวม (Grid View)":
-                # แบ่งหน้าจอซ้าย-ขวา แสดงผลพร้อมกัน
-                cam_col1, cam_col2 = st.columns(2)
-                with cam_col1:
-                    st.image(frame1_rgb, use_container_width=True, caption="มุมมองกล้องที่ 1")
-                with cam_col2:
-                    st.image(frame2_rgb, use_container_width=True, caption="มุมมองกล้องที่ 2")
-            
-            elif view_mode == "เลือกสลับมุมกล้อง (Single View)":
-                # แสดงผลเฉพาะกล้องเดี่ยวๆ ขนาดใหญ่
-                if selected_cam == "กล้องตัวที่ 1 (หน้าเคาน์เตอร์)":
-                    st.image(frame1_rgb, use_container_width=True, caption="กำลังขยาย: กล้องที่ 1")
-                else:
-                    st.image(frame2_rgb, use_container_width=True, caption="กำลังขยาย: กล้องที่ 2")
-
-        # ตัวอย่างลอจิกจำลองการแจ้งเตือน (กรณีนำไปผสานกับโค้ดนับคะแนนความเสี่ยง logic.py)
-        # สมมติว่ากล้องตัวที่ 2 ตรวจพบพฤติกรรมเสี่ยงเกินค่าที่กำหนด
-        cam2_score = 6 # ตัวอย่างสมมติ
-        if cam2_score >= 5:
-            alert_box.markdown('<div class="alert-card">🚨 <b>แจ้งเตือนภัย:</b> ตรวจพบพฤติกรรมต้องสงสัยซ่อนสินค้าที่ [กล้องตัวที่ 2]</div>', unsafe_allow_html=True)
+        # ส่งภาพไปประมวลผลผ่านโมเดล AI
+        if success1:
+            res1 = model(frame1)
+            frame1_out = res1[0].plot()
         else:
-            alert_box.empty()
+            frame1_out = frame1
 
-        # เพื่อป้องกันไม่ให้ CPU ทำงานหนักเกินไปในการรัน loop วิดีโอ
-        time.sleep(0.01)
+        if success2:
+            res2 = model(frame2)
+            frame2_out = res2[0].plot()
+        else:
+            frame2_out = frame2
+
+        # แปลงสีให้เข้ากับระบบเว็บสตรีมมิ่ง
+        frame1_rgb = cv2.cvtColor(frame1_out, cv2.COLOR_BGR2RGB)
+        frame2_rgb = cv2.cvtColor(frame2_out, cv2.COLOR_BGR2RGB)
+
+        # อัปเดตการแสดงผลบน UI ตามโหมดมุมมองที่เลือกไว้
+        if view_mode == "แสดงกล้องทั้งหมด (Grid 2x1)":
+            frame_place1.image(frame1_rgb, channels="RGB", use_column_width=True)
+            score_place1.markdown("<p style='font-size: 13px; color: #64748B;'>ดัชนีความเสี่ยงพฤติกรรม: 2 / 5 (ปกติ)</p>", unsafe_allow_html=True)
+            
+            frame_place2.image(frame2_rgb, channels="RGB", use_column_width=True)
+            score_place2.markdown("<p style='font-size: 13px; color: #64748B;'>ดัชนีความเสี่ยงพฤติกรรม: 0 / 5 (ปกติ)</p>", unsafe_allow_html=True)
+
+        elif view_mode == "กล้อง 1: โซนเคาน์เตอร์":
+            frame_place_single.image(frame1_rgb, channels="RGB", use_column_width=True)
+            score_place_single.markdown("<p style='font-size: 14px; color: #64748B; font-weight: 500;'>ดัชนีความเสี่ยงพฤติกรรม: 2 / 5 (ปกติ)</p>", unsafe_allow_html=True)
+
+        elif view_mode == "กล้อง 2: โซนชั้นวางสินค้า":
+            frame_place_single.image(frame2_rgb, channels="RGB", use_column_width=True)
+            score_place_single.markdown("<p style='font-size: 14px; color: #64748B; font-weight: 500;'>ดัชนีความเสี่ยงพฤติกรรม: 0 / 5 (ปกติ)</p>", unsafe_allow_html=True)
 
     cap1.release()
     cap2.release()
+
 else:
-    st.info("💡 กรุณากดปุ่ม 'เริ่มต้นทำงานระบบ (Start CCTV)' ที่แถบเมนูด้านข้างเพื่อเปิดใช้งานกล้อง")
+    # ข้อความเริ่มต้นเมื่อเปิดระบบขึ้นมาครั้งแรก (ดีไซน์เรียบๆ)
+    st.markdown("<p style='color: #94A3B8; font-size: 14px; text-align: left;'>กรุณาเปิดการทำงานของระบบเพื่อเริ่มต้นการตรวจสอบกล้องวงจรปิด</p>", unsafe_allow_html=True)
