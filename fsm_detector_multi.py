@@ -2,17 +2,21 @@ import cv2
 import os
 import requests
 import math
+import threading
 from datetime import datetime
 from ultralytics import YOLO
 from database import log_incident
 
-# ----------------- CONFIGURATION -----------------
-# ระบุไอดีกล้อง หรือที่อยู่ IP Camera (เช่น "rtsp://admin:12345@192.168.1.50:554/stream1")
-CAMERA_SOURCES = [0]  # [0, 1] หากต้องการต่อเว็บแคม 2 ตัวพร้อมกัน
+CAMERA_SOURCES = {
+    "กล้องที่ 1 (หน้าร้าน)": 0,
+    "กล้องที่ 2 (ชั้นวางสินค้า)": 1
+}
 
 TELEGRAM_TOKEN = "YOUR_TELEGRAM_BOT_TOKEN"
 TELEGRAM_CHAT_ID = "YOUR_TELEGRAM_CHAT_ID"
-# -------------------------------------------------
+
+if "global_fsm_tracker" not in globals():
+    global_fsm_tracker = {}
 
 def send_telegram_alert(image_path, person_id, score):
     if TELEGRAM_TOKEN == "YOUR_TELEGRAM_BOT_TOKEN":
@@ -26,124 +30,164 @@ def send_telegram_alert(image_path, person_id, score):
         print(f"Telegram Error: {e}")
 
 class IndividualFSM:
-    """ระบบ FSM สำหรับคำนวณคะแนนแยกรายบุคคลตาม ID"""
     def __init__(self, person_id):
         self.person_id = person_id
         self.state = "IDLE"
         self.score = 0
-        self.cooldown = 0
+        self.frames_in_state = 0
+        self.is_alerted = False
 
-    def update(self, hand_box, obj_box, body_box):
-        if self.cooldown > 0:
-            self.cooldown -= 1
+    def update(self, left_hand, right_hand, body_box, zone_coords):
+        if not body_box or zone_coords is None:
             return self.score
 
-        hand_center = ((hand_box[0]+hand_box[2])/2, (hand_box[1]+hand_box[3])/2) if hand_box else None
-        obj_center = ((obj_box[0]+obj_box[2])/2, (obj_box[1]+obj_box[3])/2) if obj_box else None
-        
-        # FSM Sequential Logic
-        if self.state == "IDLE" and hand_center and obj_center:
-            if math.dist(hand_center, obj_center) < 70:
+        bx1, by1, bx2, by2 = body_box
+        body_width = bx2 - bx1
+        body_height = by2 - by1
+
+        # เช็กพิกัดมือเข้าโซน
+        hand_in_product_zone = False
+        for hand in [left_hand, right_hand]:
+            if hand:
+                hx, hy = hand
+                if (zone_coords[0] < hx < zone_coords[2]) and (zone_coords[1] < hy < zone_coords[3]):
+                    hand_in_product_zone = True
+
+        # เช็กพิกัดมือเข้าลำตัว
+        hand_in_body_area = False
+        for hand in [left_hand, right_hand]:
+            if hand:
+                hx, hy = hand
+                if (bx1 < hx < bx2) and (by1 + (body_height * 0.25) < hy < by1 + (body_height * 0.85)):
+                    hand_in_body_area = True
+
+        # FSM Logic
+        if self.state == "IDLE" and not self.is_alerted:
+            if hand_in_product_zone:
                 self.state = "PICKING"
-                self.score += 1
+                self.score = 1
+                self.frames_in_state = 0
 
         elif self.state == "PICKING":
-            self.state = "HOLDING"
-            
-        elif self.state == "HOLDING" and obj_box and body_box:
-            if (obj_box[0] > body_box[0] and obj_box[2] < body_box[2] and
-                obj_box[1] > body_box[1] and obj_box[3] < body_box[3]):
-                self.state = "CONCEALING"
-                self.score += 2
-                
-        elif self.state == "CONCEALING" and (obj_box is None) and hand_box and body_box:
-            if hand_box[0] > body_box[0] and hand_box[2] < body_box[2]:
-                self.score += 2
-                self.state = "ALERT"
+            if not hand_in_product_zone: 
+                self.state = "HOLDING"
+                self.score = 2
+                self.frames_in_state = 0
 
-        if self.score > 0 and hand_box is None and obj_box is None:
-            self.state = "IDLE"
-            self.score = max(0, self.score - 1)
+        elif self.state == "HOLDING":
+            if hand_in_body_area:
+                self.state = "CONCEALING"
+                self.score = 4
+                self.frames_in_state = 0
+            else:
+                self.frames_in_state += 1
+                if self.frames_in_state > 60: 
+                    self.score = 0
+                    self.state = "IDLE"
+
+        elif self.state == "CONCEALING":
+            self.frames_in_state += 1
+            if hand_in_body_area and self.frames_in_state > 10:
+                self.state = "ALERT"
+                self.score = 5
+            elif not hand_in_body_area:
+                self.state = "HOLDING"
+                self.score = 2
 
         return self.score
 
-    def reset(self):
-        self.state = "IDLE"
-        self.score = 0
-        self.cooldown = 150 # หยุดจับตาคนนี้สักพักหลังแจ้งเตือนไปแล้ว
+class CameraStream:
+    def __init__(self, source):
+        self.cap = cv2.VideoCapture(source)
+        self.cap.set(cv2.CAP_PROP_FRAME_WIDTH, 640)
+        self.cap.set(cv2.CAP_PROP_FRAME_HEIGHT, 480)
+        self.ret, self.frame = self.cap.read()
+        self.running = True
+        self.lock = threading.Lock() # เพิ่ม Lock ป้องกันภาพพังเวลาดึงข้อมูลข้าม Thread
+        self.thread = threading.Thread(target=self.update, args=())
+        self.thread.daemon = True
+        self.thread.start()
 
-def process_multi_camera(camera_index=0):
-    """ฟังก์ชันเปิดกล้องแต่ละตัว ทำ Tracking ระบุ ID และคำนวณคะแนนบนหัว"""
-    model = YOLO("yolo11n.pt")
-    cap = cv2.VideoCapture(camera_index)
-    
-    # ดิกชันนารีเก็บคลาส FSM แยกตามตัวบุคคล {person_id: IndividualFSM_Object}
-    tracked_persons = {}
-    os.makedirs("alerts", exist_ok=True)
+    def update(self):
+        while self.running:
+            if self.cap.isOpened():
+                ret, frame = self.cap.read()
+                if ret:
+                    with self.lock:
+                        self.frame = cv2.resize(frame, (640, 480))
+                        self.ret = ret
 
-    while cap.isOpened():
-        ret, frame = cap.read()
-        if not ret:
-            break
+    def read(self):
+        with self.lock:
+            return self.ret, self.frame if self.frame is not None else None
 
-        # เรียกใช้โมเดลพร้อมเปิดระบบ Tracking (ByteTrack)
-        results = model.track(frame, persist=True, tracker="bytetrack.yaml", verbose=False)[0]
+    def stop(self):
+        self.running = False
+        self.cap.release()
+
+# โหลดโมเดล Pose ไว้ล่วงหน้า
+pose_model = YOLO("yolo11n-pose.pt")
+
+def process_frame_pipeline(frame, camera_name, zone_coords):
+    global global_fsm_tracker
+    if frame is None or zone_coords is None:
+        return frame
         
-        # วิ่งหาออบเจกต์รอบข้างก่อน (มือ/สินค้า) เพื่อเอาไปเทียบกับตัวบุคคล
-        hands, objects = [], []
-        for box in results.boxes:
-            cls = int(box.cls[0])
-            xyxy = box.xyxy[0].tolist()
-            if cls == 43 or cls == 39:  # คลาสสินค้า/วัตถุจำลอง
-                objects.append(xyxy)
-                cv2.rectangle(frame, (int(xyxy[0]), int(xyxy[1])), (int(xyxy[2]), int(xyxy[3])), (0, 255, 0), 1)
+    # วาดกรอบ PRODUCT ZONE สีม่วง
+    cv2.rectangle(frame, (zone_coords[0], zone_coords[1]), (zone_coords[2], zone_coords[3]), (255, 0, 255), 2)
+    cv2.putText(frame, f"PRODUCT ZONE ({camera_name})", (zone_coords[0], zone_coords[1] - 10), cv2.FONT_HERSHEY_SIMPLEX, 0.5, (255, 0, 255), 2)
 
-        # วนลูปประมวลผลเฉพาะ "คน" ที่ถูกระบุ ID
-        for box in results.boxes:
+    # รันโมเดลตรวจจับท่าทางบุคคล
+    pose_results = pose_model.track(frame, persist=True, tracker="bytetrack.yaml", verbose=False)[0]
+    current_frame_ids = []
+
+    if pose_results.boxes is not None and pose_results.keypoints is not None:
+        for idx, box in enumerate(pose_results.boxes):
             if box.id is None:
                 continue
             
             cls = int(box.cls[0])
-            if cls == 0:  # เจอคน (Person)
-                person_id = int(box.id[0]) # ดึง ID คนที่ 1, 2, 3...
+            if cls == 0:  
+                person_id = int(box.id[0])
+                tracker_key = f"{camera_name}_ID_{person_id}"
+                current_frame_ids.append(tracker_key)
                 body_box = box.xyxy[0].tolist()
 
-                # สร้างตัวนับคะแนนใหม่หากเป็นบุคคลใหม่ที่เพิ่งเดินเข้ากล้อง
-                if person_id not in tracked_persons:
-                    tracked_persons[person_id] = IndividualFSM(person_id)
+                if tracker_key not in global_fsm_tracker:
+                    global_fsm_tracker[tracker_key] = IndividualFSM(person_id)
 
-                # ค้นหามือและวัตถุที่อยู่ใกล้หรือสัมพันธ์กับบุคคล ID นี้
-                my_hand = None
-                my_obj = None
+                keypoints = pose_results.keypoints[idx].xy[0].tolist()
+                left_hand, right_hand = None, None
                 
-                # มองหาวัตถุที่อยู่ในรัศมีขอบเขตตัวของ ID นี้
-                for obj in objects:
-                    if (obj[0] > body_box[0] - 20 and obj[2] < body_box[2] + 20):
-                        my_obj = obj
-                        break
+                if len(keypoints) > 10:
+                    if keypoints[9][0] > 0 and keypoints[9][1] > 0:
+                        left_hand = (keypoints[9][0], keypoints[9][1])
+                        cv2.circle(frame, (int(left_hand[0]), int(left_hand[1])), 8, (255, 255, 0), -1)
+                    if keypoints[10][0] > 0 and keypoints[10][1] > 0:
+                        right_hand = (keypoints[10][0], keypoints[10][1])
+                        cv2.circle(frame, (int(right_hand[0]), int(right_hand[1])), 8, (255, 255, 0), -1)
 
-                # อัปเดตสถานะ FSM และคะแนนของคนคนนี้
-                current_score = tracked_persons[person_id].update(my_hand, my_obj, body_box)
-                current_state = tracked_persons[person_id].state
+                current_score = global_fsm_tracker[tracker_key].update(left_hand, right_hand, body_box, zone_coords)
+                current_state = global_fsm_tracker[tracker_key].state
 
-                # วาดกรอบและ "แสดงไอดีพร้อมคะแนนบนหัว"
                 x1, y1, x2, y2 = map(int, body_box)
                 color = (0, 0, 255) if current_score >= 5 else (0, 255, 255)
                 
-                # วาดป้ายบนหัวบุคคล
-                label = f"ID: {person_id} | Score: {current_score}/5 ({current_state})"
-                cv2.rectangle(frame, (x1, y1 - 30), (x1 + 320, y1), color, -1)
-                cv2.putText(frame, label, (x1 + 5, y1 - 8), cv2.FONT_HERSHEY_SIMPLEX, 0.5, (0, 0, 0), 2)
+                label = f"ID: {person_id} | Risk: {current_score}/5 ({current_state})"
+                cv2.rectangle(frame, (x1, y1 - 35), (x1 + 240, y1), color, -1)
+                cv2.putText(frame, label, (x1 + 5, y1 - 10), cv2.FONT_HERSHEY_SIMPLEX, 0.5, (0, 0, 0), 2)
                 cv2.rectangle(frame, (x1, y1), (x2, y2), color, 2)
 
-                # เงื่อนไขแจ้งเตือนภัย
-                if current_score >= 5 and current_state == "ALERT":
-                    img_name = f"alerts/cam{camera_index}_id{person_id}_{datetime.now().strftime('%M%S')}.jpg"
+                if current_score >= 5 and not global_fsm_tracker[tracker_key].is_alerted:
+                    global_fsm_tracker[tracker_key].is_alerted = True
+                    os.makedirs("alerts", exist_ok=True)
+                    img_name = f"alerts/{tracker_key}_{datetime.now().strftime('%Y%m%d_%H%M%S')}.jpg"
                     cv2.imwrite(img_name, frame)
                     log_incident(current_score, img_name)
                     send_telegram_alert(img_name, person_id, current_score)
-                    tracked_persons[person_id].reset()
 
-        yield frame
+    for key in list(global_fsm_tracker.keys()):
+        if key.startswith(camera_name) and key not in current_frame_ids:
+            del global_fsm_tracker[key]
 
-    cap.release()
+    return frame
