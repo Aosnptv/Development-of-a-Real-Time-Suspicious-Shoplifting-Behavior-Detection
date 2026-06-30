@@ -18,7 +18,7 @@ st.markdown("""
 
 @st.cache_resource
 def load_model():
-    return YOLO('yolov8n-pose.pt') # โหลดโมเดลสำหรับจับโครงกระดูกและท่าทาง
+    return YOLO('yolov8n-pose.pt') # โหลดโมเดลสำหรับจับโครงกระดูกและท่าทางfuo 
 
 model = load_model()
 
