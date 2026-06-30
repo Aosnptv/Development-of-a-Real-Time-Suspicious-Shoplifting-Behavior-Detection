@@ -4,7 +4,6 @@ from datetime import datetime
 DB_NAME = "shoplifting_detection.db"
 
 def init_db():
-    """สร้างฐานข้อมูลและตารางหากยังไม่มี"""
     conn = sqlite3.connect(DB_NAME)
     cursor = conn.cursor()
     cursor.execute('''
@@ -20,19 +19,17 @@ def init_db():
     conn.close()
 
 def log_incident(score, image_path):
-    """บันทึกเหตุการณ์เสี่ยงลงฐานข้อมูล"""
     conn = sqlite3.connect(DB_NAME)
     cursor = conn.cursor()
     now = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
     cursor.execute('''
         INSERT INTO incidents (timestamp, suspicion_score, image_path, status)
         VALUES (?, ?, ?, ?)
-    ''', (now, score, image_path, "แจ้งเตือนแล้ว"))
+    ''', (now, score, image_path, "ตรวจพบการซ่อนสินค้า"))
     conn.commit()
     conn.close()
 
 def get_all_incidents():
-    """ดึงข้อมูลประวัติทั้งหมด"""
     conn = sqlite3.connect(DB_NAME)
     cursor = conn.cursor()
     cursor.execute("SELECT * FROM incidents ORDER BY id DESC")
@@ -40,6 +37,16 @@ def get_all_incidents():
     conn.close()
     return rows
 
-if __name__ == "__main__":
-    init_db()
-    print("Database initialized successfully.")
+def get_dashboard_stats():
+    conn = sqlite3.connect(DB_NAME)
+    cursor = conn.cursor()
+    
+    cursor.execute("SELECT COUNT(*) FROM incidents")
+    total_alerts = cursor.fetchone()[0]
+    
+    today_str = datetime.now().strftime("%Y-%m-%d")
+    cursor.execute("SELECT COUNT(*) FROM incidents WHERE timestamp LIKE ?", (f"{today_str}%",))
+    today_alerts = cursor.fetchone()[0]
+    
+    conn.close()
+    return total_alerts, today_alerts
