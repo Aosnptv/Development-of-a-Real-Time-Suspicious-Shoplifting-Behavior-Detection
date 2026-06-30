@@ -1,3 +1,5 @@
+ดาวน์โหลดและติดตั้ง Microsoft Visual C++
+
 # 1. ติดตั้งระบบเฟรมเวิร์กหน้าเว็บแดชบอร์ดหลัก
 pip install streamlit
 
@@ -14,3 +16,6 @@ pip install requests
 pip install pandas
 
 streamlit run app.py
+
+ModuleNotFoundError: No module named 'torch'
+
