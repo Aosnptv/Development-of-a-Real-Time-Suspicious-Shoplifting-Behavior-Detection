@@ -4,7 +4,7 @@ import cv2
 from ultralytics import YOLO
 import numpy as np
 import datetime
-# นำเข้าไฟล์คำนวณคะแนนที่เราสร้างขึ้นมา
+# นำเข้าไฟล์คำนวณคะแนนที่เราสร้างขึ้นมา 0
 from behavior_analyzer import BehaviorAnalyzer 
 
 st.set_page_config(page_title="CCTV Control Center", layout="wide", initial_sidebar_state="expanded")
