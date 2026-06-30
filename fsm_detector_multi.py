@@ -3,10 +3,13 @@ import os
 import requests
 import math
 import threading
+import numpy as np
+import time
 from datetime import datetime
 from ultralytics import YOLO
 from database import log_incident
 
+# ----------------- CONFIGURATION -----------------
 CAMERA_SOURCES = {
     "กล้องที่ 1 (หน้าร้าน)": 0,
     "กล้องที่ 2 (ชั้นวางสินค้า)": 1
@@ -14,6 +17,7 @@ CAMERA_SOURCES = {
 
 TELEGRAM_TOKEN = "YOUR_TELEGRAM_BOT_TOKEN"
 TELEGRAM_CHAT_ID = "YOUR_TELEGRAM_CHAT_ID"
+# -------------------------------------------------
 
 if "global_fsm_tracker" not in globals():
     global_fsm_tracker = {}
@@ -37,23 +41,23 @@ class IndividualFSM:
         self.frames_in_state = 0
         self.is_alerted = False
 
-    def update(self, left_hand, right_hand, body_box, zone_coords):
-        if not body_box or zone_coords is None:
+    def update(self, left_hand, right_hand, body_box, detected_shelf_zone):
+        if not body_box:
             return self.score
 
         bx1, by1, bx2, by2 = body_box
         body_width = bx2 - bx1
         body_height = by2 - by1
 
-        # เช็กพิกัดมือเข้าโซน
         hand_in_product_zone = False
-        for hand in [left_hand, right_hand]:
-            if hand:
-                hx, hy = hand
-                if (zone_coords[0] < hx < zone_coords[2]) and (zone_coords[1] < hy < zone_coords[3]):
-                    hand_in_product_zone = True
+        if detected_shelf_zone is not None:
+            szx1, szy1, szx2, szy2 = detected_shelf_zone
+            for hand in [left_hand, right_hand]:
+                if hand:
+                    hx, hy = hand
+                    if (szx1 < hx < szx2) and (szy1 < hy < szy2):
+                        hand_in_product_zone = True
 
-        # เช็กพิกัดมือเข้าลำตัว
         hand_in_body_area = False
         for hand in [left_hand, right_hand]:
             if hand:
@@ -61,7 +65,6 @@ class IndividualFSM:
                 if (bx1 < hx < bx2) and (by1 + (body_height * 0.25) < hy < by1 + (body_height * 0.85)):
                     hand_in_body_area = True
 
-        # FSM Logic
         if self.state == "IDLE" and not self.is_alerted:
             if hand_in_product_zone:
                 self.state = "PICKING"
@@ -98,12 +101,22 @@ class IndividualFSM:
 
 class CameraStream:
     def __init__(self, source):
+        self.source = source
         self.cap = cv2.VideoCapture(source)
         self.cap.set(cv2.CAP_PROP_FRAME_WIDTH, 640)
         self.cap.set(cv2.CAP_PROP_FRAME_HEIGHT, 480)
         self.ret, self.frame = self.cap.read()
+        self.frame_count = 0  
         self.running = True
-        self.lock = threading.Lock() # เพิ่ม Lock ป้องกันภาพพังเวลาดึงข้อมูลข้าม Thread
+        self.lock = threading.Lock()
+        
+        # หากไม่มีกล้องอยู่จริง สร้างภาพจำลองเริ่มต้นไว้
+        if not self.cap.isOpened():
+            self.ret = True
+            self.frame = np.zeros((480, 640, 3), dtype=np.uint8)
+            cv2.putText(self.frame, f"Camera Source {source} Not Found", (80, 240), 
+                        cv2.FONT_HERSHEY_SIMPLEX, 0.7, (0, 0, 255), 2)
+            
         self.thread = threading.Thread(target=self.update, args=())
         self.thread.daemon = True
         self.thread.start()
@@ -116,28 +129,54 @@ class CameraStream:
                     with self.lock:
                         self.frame = cv2.resize(frame, (640, 480))
                         self.ret = ret
+                        self.frame_count += 1
+                    # ควบคุมความเร็วของลูปไม่ให้เร็วเกินไป (ประมาณ 30 FPS) เพื่อลดการกระตุกของระบบโดยรวม
+                    time.sleep(0.02)
+                else:
+                    # ป้องกันกรณีสัญญาณกล้องหลุด ไม่ให้ลูปหมุนฟรีจน CPU รัน 100%
+                    with self.lock:
+                        self.ret = True
+                    time.sleep(0.03)
+            else:
+                # 💡 จุดแก้ไขสำคัญ: กรณีกล้องที่ 2 ไม่มีอยู่จริง ให้บวกเฟรมแบบหน่วงเวลา 30 FPS เลขจะไม่ดีดเป็นพันและไม่กระตุกแล้ว
+                with self.lock:
+                    self.frame_count += 1
+                time.sleep(0.033)
 
     def read(self):
         with self.lock:
-            return self.ret, self.frame if self.frame is not None else None
+            return self.ret, self.frame if self.frame is not None else None, self.frame_count
 
     def stop(self):
         self.running = False
-        self.cap.release()
+        if self.cap.isOpened():
+            self.cap.release()
 
-# โหลดโมเดล Pose ไว้ล่วงหน้า
+# โหลดโมเดล
+object_model = YOLO("yolo11n.pt")
 pose_model = YOLO("yolo11n-pose.pt")
 
-def process_frame_pipeline(frame, camera_name, zone_coords):
+def process_frame_pipeline(frame, camera_name, current_frame_number):
     global global_fsm_tracker
-    if frame is None or zone_coords is None:
+    if frame is None:
         return frame
         
-    # วาดกรอบ PRODUCT ZONE สีม่วง
-    cv2.rectangle(frame, (zone_coords[0], zone_coords[1]), (zone_coords[2], zone_coords[3]), (255, 0, 255), 2)
-    cv2.putText(frame, f"PRODUCT ZONE ({camera_name})", (zone_coords[0], zone_coords[1] - 10), cv2.FONT_HERSHEY_SIMPLEX, 0.5, (255, 0, 255), 2)
+    detected_shelf_zone = None
 
-    # รันโมเดลตรวจจับท่าทางบุคคล
+    # 1. ค้นหาชั้นวางของอัตโนมัติ
+    obj_results = object_model(frame, verbose=False)[0]
+    if obj_results.boxes is not None:
+        for box in obj_results.boxes:
+            cls = int(box.cls[0])
+            conf = float(box.conf[0])
+            if cls == 60 and conf > 0.35: 
+                xyxy = box.xyxy[0].tolist()
+                detected_shelf_zone = [int(xyxy[0]), int(xyxy[1]), int(xyxy[2]), int(xyxy[3])]
+                cv2.rectangle(frame, (detected_shelf_zone[0], detected_shelf_zone[1]), (detected_shelf_zone[2], detected_shelf_zone[3]), (255, 0, 255), 2)
+                cv2.putText(frame, f"AUTO SHELF ZONE ({int(conf*100)}%)", (detected_shelf_zone[0], detected_shelf_zone[1] - 10), cv2.FONT_HERSHEY_SIMPLEX, 0.5, (255, 0, 255), 2)
+                break 
+
+    # 2. ค้นหาและติดตามคน
     pose_results = pose_model.track(frame, persist=True, tracker="bytetrack.yaml", verbose=False)[0]
     current_frame_ids = []
 
@@ -167,7 +206,7 @@ def process_frame_pipeline(frame, camera_name, zone_coords):
                         right_hand = (keypoints[10][0], keypoints[10][1])
                         cv2.circle(frame, (int(right_hand[0]), int(right_hand[1])), 8, (255, 255, 0), -1)
 
-                current_score = global_fsm_tracker[tracker_key].update(left_hand, right_hand, body_box, zone_coords)
+                current_score = global_fsm_tracker[tracker_key].update(left_hand, right_hand, body_box, detected_shelf_zone)
                 current_state = global_fsm_tracker[tracker_key].state
 
                 x1, y1, x2, y2 = map(int, body_box)
@@ -189,5 +228,9 @@ def process_frame_pipeline(frame, camera_name, zone_coords):
     for key in list(global_fsm_tracker.keys()):
         if key.startswith(camera_name) and key not in current_frame_ids:
             del global_fsm_tracker[key]
+
+    # วาดเลขเฟรมไว้ที่ขวาล่างจอภาพ (Frame: XXXX)
+    frame_text = f"Frame: {current_frame_number}"
+    cv2.putText(frame, frame_text, (500, 460), cv2.FONT_HERSHEY_SIMPLEX, 0.6, (0, 255, 255), 2)
 
     return frame
