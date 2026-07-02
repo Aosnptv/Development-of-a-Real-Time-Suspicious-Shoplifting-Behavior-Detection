@@ -1,7 +1,7 @@
 ดาวน์โหลดและติดตั้ง Microsoft Visual C++
 
 # 1. ติดตั้งระบบเฟรมเวิร์กหน้าเว็บแดชบอร์ดหลัก
-pip install streamlit
+pip install flask
 
 # 2. ติดตั้งระบบจัดการภาพและประมวลผลวิดีโอกล้องวงจรปิด
 pip install opencv-python
@@ -15,7 +15,5 @@ pip install requests
 # 5. ติดตั้งระบบจัดการตารางและข้อมูลประวัติเหตุการณ์ย้อนหลัง
 pip install pandas
 
-streamlit run app.py
-
-ModuleNotFoundError: No module named 'torch'
-
+สั่งรันไฟล์เซิร์ฟเวอร์: python app.py
+เปิดเว็บบราวเซอร์ของคุณ (เช่น Chrome, Edge) แล้วเข้าไปที่: http://localhost:5000
