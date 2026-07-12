@@ -1,0 +1,14 @@
+2026-07-13 03:28:10 [INFO] Database initialized with default camera profiles.
+2026-07-13 03:28:13 [INFO] Started worker thread for camera: Camera 01
+2026-07-13 03:28:13 [INFO] Registered camera device: Camera 01
+2026-07-13 03:28:13 [INFO] Started worker thread for camera: Camera 02
+2026-07-13 03:28:13 [INFO] Registered camera device: Camera 02
+2026-07-13 03:28:14 [ERROR] Failed to open video source for Camera 02: demo.mp4
+2026-07-13 03:30:34 [INFO] Started worker thread for camera: Camera 01
+2026-07-13 03:30:34 [INFO] Registered camera device: Camera 01
+2026-07-13 03:30:34 [INFO] Started worker thread for camera: Camera 02
+2026-07-13 03:30:34 [INFO] Registered camera device: Camera 02
+2026-07-13 03:30:34 [ERROR] Failed to open video source for Camera 02: demo.mp4
+2026-07-13 03:32:17 [INFO] Stopped worker thread for camera: Camera 01
+2026-07-13 03:32:17 [INFO] Started worker thread for camera: Camera 01
+2026-07-13 03:32:17 [WARNING] Camera Camera 01 was manually restarted.
