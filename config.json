@@ -1,0 +1,27 @@
+{
+    "model_settings": {
+        "model_path": "models/yolo11s.pt",
+        "confidence_threshold": 0.50,
+        "iou_threshold": 0.45,
+        "tracker": "ByteTrack"
+    },
+    "subsystems": {
+        "database_connected": true,
+        "telegram_connected": true,
+        "detector_running": false
+    },
+    "cameras": [
+        {"id": 1, "name": "Main Entrance", "url": "0", "active": true, "res": "1920x1080", "fps": 30.0},
+        {"id": 2, "name": "Checkout A", "url": "rtsp://192.168.1.50/stream1", "active": true, "res": "1280x720", "fps": 25.0},
+        {"id": 3, "name": "Shelf Zone B", "url": "rtsp://192.168.1.51/stream1", "active": false, "res": "N/A", "fps": 0.0},
+        {"id": 4, "name": "Backyard", "url": "rtsp://192.168.1.52/stream1", "active": false, "res": "N/A", "fps": 0.0}
+    ],
+    "zones": {
+        "roi_enabled": true,
+        "shelf_zones": ["Zone_A_Premium", "Zone_B_Alcohol"]
+    },
+    "telegram": {
+        "bot_token": "YOUR_BOT_TOKEN_HERE",
+        "chat_id": "YOUR_CHAT_ID_HERE"
+    }
+}
