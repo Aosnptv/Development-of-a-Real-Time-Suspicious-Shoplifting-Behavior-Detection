@@ -34,7 +34,7 @@ def render_camera_management_page():
                 if frame is not None and cam_info["online"]:
                     # 🔃 แปลงรหัสสีภาพดิบจาก OpenCV (BGR) เป็นสเปกหน้าจอเบราว์เซอร์ (RGB)
                     frame_rgb = cv2.cvtColor(frame, cv2.COLOR_BGR2RGB)
-                    st.image(frame_rgb, use_container_width=True)
+                    st.image(frame_rgb, width="stretch")
                 else:
                     # กรณีกล้องถูกปิด หรือสตรีมยังหลุด/บัฟเฟอร์อยู่
                     st.error("Video stream is currently stopped or unreachable.")
