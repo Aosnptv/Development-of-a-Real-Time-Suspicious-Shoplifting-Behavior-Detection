@@ -1,81 +1,63 @@
 import cv2
-import threading
 import time
-import datetime
-from camera.camera_buffer import FrameBuffer
-from camera.frame_processor import FrameProcessor
-from services.logger import logger
+import numpy as np
+from typing import Tuple, Optional
 
 class CameraDevice:
-    def __init__(self, cam_id: int, name: str, source: str):
-        self.cam_id = cam_id
-        self.name = name
+    def __init__(self, source):
         self.source = source
-        
-        #แปลงค่า source เป็นตัวเลขกรณีที่เป็น Webcam ในเครื่อง
-        try:
-            self.source = int(source)
-        except ValueError:
-            self.source = source
-            
-        self.buffer = FrameBuffer()
-        self.is_running = False
-        self.thread = None
+        self.cap = None
+        self.width = 0
+        self.height = 0
         self.fps = 0.0
-        self.resolution = "N/A"
-        
-    def start(self):
-        if not self.is_running:
-            self.is_running = True
-            self.thread = threading.Thread(target=self._capture_loop, daemon=True)
-            self.thread.start()
-            logger.info(f"Started worker thread for camera: {self.name}")
-
-    def stop(self):
         self.is_running = False
-        if self.thread:
-            self.thread.join(timeout=1.0)
-        logger.info(f"Stopped worker thread for camera: {self.name}")
+        
+        # สำหรับคำนวณ FPS จริงแบบ Dynamic
+        self._prev_time = 0.0
 
-    def _capture_loop(self):
-        # เปิดการเชื่อมต่อสตรีมกล้อง
-        cap = cv2.VideoCapture(self.source)
-        if not cap.isOpened():
-            logger.error(f"Failed to open video source for {self.name}: {self.source}")
-            self.is_running = False
-            return
+    def open(self) -> bool:
+        """เปิดฮาร์ดแวร์กล้องและดึงข้อมูลทางกายภาพจริง"""
+        # ปรับค่าอิงตามชนิดของ Source เพื่อป้องกัน OpenCV บล็อกเธรดนานเกินไป
+        if str(self.source).isdigit():
+            self.cap = cv2.VideoCapture(int(self.source), cv2.CAP_DSHOW) # สำหรับ Windows (ลดอาการกล้องเปิดช้า)
+        else:
+            self.cap = cv2.VideoCapture(self.source)
 
-        # ตรวจสอบขนาดความละเอียดภาพดั้งเดิม
-        width = int(cap.get(cv2.CAP_PROP_FRAME_WIDTH))
-        height = int(cap.get(cv2.CAP_PROP_FRAME_HEIGHT))
-        self.resolution = f"{width}x{height}"
+        if not self.cap.isOpened():
+            return False
 
-        prev_time = 0
-        while self.is_running:
-            ret, frame = cap.read()
-            if not ret:
-                logger.warning(f"Failed to grab frame from {self.name}. Reconnecting...")
-                time.sleep(1.0)
-                continue
+        # อ่านข้อมูลความละเอียดที่กล้องส่งมาจริง (DoD ข้อ 5) - แก้ไขจาก cv3 เป็น cv2 แล้ว
+# ตรวจสอบและแก้ไขให้เป็น cv2 ทั้งสองบรรทัดครับ
+        self.width = int(self.cap.get(cv2.CAP_PROP_FRAME_WIDTH)) if hasattr(cv2, 'CAP_PROP_FRAME_WIDTH') else int(self.cap.get(3))
+        self.height = int(self.cap.get(cv2.CAP_PROP_FRAME_HEIGHT)) if hasattr(cv2, 'CAP_PROP_FRAME_HEIGHT') else int(self.cap.get(4))
+        
+        self.is_running = True
+        self._prev_time = time.time()
+        return True
 
-            # ประมวลผลภาพขั้นต้น (Resize + Timestamp)
-            processed_frame = FrameProcessor.process(frame)
-            self.buffer.push(processed_frame)
+    def read_frame(self) -> Tuple[bool, Optional[np.ndarray]]:
+        """อ่านเฟรมและคำนวณ Dynamic FPS จริง (DoD ข้อ 4)"""
+        if not self.is_running or self.cap is None:
+            return False, None
 
-            # คำนวณ FPS จริงของฮาร์ดแวร์กล้อง
-            current_time = time.time()
-            self.fps = 1 / (current_time - prev_time) if prev_time > 0 else 30.0
-            prev_time = current_time
-            
-        cap.release()
+        ret, frame = self.cap.read()
+        if not ret or frame is None:
+            return False, None
 
-    def get_latest_frame(self):
-        return self.buffer.pop()
+        # คำนวณความเร็วเฟรมเรตผันแปรตามเวลาจริง
+        current_time = time.time()
+        time_diff = current_time - self._prev_time
+        if time_diff > 0:
+            actual_fps = 1.0 / time_diff
+            # ใช้ Exponential Moving Average เพื่อให้ตัวเลข FPS นิ่งขึ้นเล็กน้อย ไม่แกว่งรุนแรงเกินไป
+            self.fps = (self.fps * 0.9) + (actual_fps * 0.1)
+        self._prev_time = current_time
 
-    def get_status_report(self) -> dict:
-        return {
-            "online": self.is_running,
-            "fps": round(self.fps, 1),
-            "resolution": self.resolution,
-            "last_seen": datetime.datetime.now().strftime("%H:%M:%S") if self.is_running else "N/A"
-        }
+        return True, frame
+
+    def release(self):
+        """คืนทรัพยากรกล้องให้ระบบปฏิบัติการ ป้องกัน Memory Leak (DoD ข้อ 11)"""
+        self.is_running = False
+        if self.cap is not None:
+            self.cap.release()
+            self.cap = None
