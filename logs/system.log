@@ -12,3 +12,22 @@
 2026-07-13 03:32:17 [INFO] Stopped worker thread for camera: Camera 01
 2026-07-13 03:32:17 [INFO] Started worker thread for camera: Camera 01
 2026-07-13 03:32:17 [WARNING] Camera Camera 01 was manually restarted.
+2026-07-13 03:54:38 [INFO] Registering camera device ID: 0
+2026-07-13 03:54:38 [INFO] Camera 0 Started
+2026-07-13 03:55:24 [INFO] Registering camera device ID: 0
+2026-07-13 03:55:24 [INFO] Camera 0 Started
+2026-07-13 03:57:56 [INFO] Registering camera device ID: 0
+2026-07-13 03:57:56 [INFO] Camera 0 Started
+2026-07-13 03:57:57 [INFO] Registering camera device ID: demo.mp4
+2026-07-13 03:57:57 [INFO] Camera demo.mp4 Started
+2026-07-13 03:57:57 [ERROR] Failed to open Camera demo.mp4
+2026-07-13 03:59:10 [INFO] Registering camera device ID: 0
+2026-07-13 03:59:10 [INFO] Camera 0 Started
+2026-07-13 03:59:10 [INFO] Registering camera device ID: demo.mp4
+2026-07-13 03:59:10 [INFO] Camera demo.mp4 Started
+2026-07-13 03:59:11 [ERROR] Failed to open Camera demo.mp4
+2026-07-13 04:02:52 [INFO] Registering camera device ID: 0
+2026-07-13 04:02:52 [INFO] Camera 0 Started
+2026-07-13 04:02:53 [INFO] Registering camera device ID: demo.mp4
+2026-07-13 04:02:53 [INFO] Camera demo.mp4 Started
+2026-07-13 04:02:53 [ERROR] Failed to open Camera demo.mp4
