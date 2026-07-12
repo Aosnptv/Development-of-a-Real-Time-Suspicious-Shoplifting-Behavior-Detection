@@ -31,3 +31,22 @@
 2026-07-13 04:02:53 [INFO] Registering camera device ID: demo.mp4
 2026-07-13 04:02:53 [INFO] Camera demo.mp4 Started
 2026-07-13 04:02:53 [ERROR] Failed to open Camera demo.mp4
+2026-07-13 04:24:50 [INFO] [Pipeline] Registering and initializing camera device ID: 0
+2026-07-13 04:24:51 [INFO] Camera 0 Started
+2026-07-13 04:24:51 [INFO] [Pipeline] Registering and initializing camera device ID: demo.mp4
+2026-07-13 04:24:51 [ERROR] [Pipeline] Failed to open camera device: demo.mp4
+2026-07-13 04:24:51 [INFO] [Pipeline] Registering and initializing camera device ID: 0
+2026-07-13 04:24:51 [INFO] [Pipeline] Registering and initializing camera device ID: demo.mp4
+2026-07-13 04:24:51 [ERROR] [Pipeline] Failed to open camera device: demo.mp4
+2026-07-13 04:25:45 [INFO] [Pipeline] Registering and initializing camera device ID: 0
+2026-07-13 04:25:45 [INFO] Camera 0 Started
+2026-07-13 04:25:45 [INFO] [Pipeline] Registering and initializing camera device ID: demo.mp4
+2026-07-13 04:25:46 [ERROR] [Pipeline] Failed to open camera device: demo.mp4
+2026-07-13 04:26:22 [INFO] [Pipeline] Registering and initializing camera device ID: 0
+2026-07-13 04:26:22 [INFO] Camera 0 Started
+2026-07-13 04:26:22 [INFO] [Pipeline] Registering and initializing camera device ID: demo.mp4
+2026-07-13 04:26:22 [ERROR] [Pipeline] Failed to open camera device: demo.mp4
+2026-07-13 04:27:04 [INFO] [Pipeline] Registering and initializing camera device ID: 0
+2026-07-13 04:27:04 [INFO] Camera 0 Started
+2026-07-13 04:27:04 [INFO] [Pipeline] Registering and initializing camera device ID: demo.mp4
+2026-07-13 04:27:04 [ERROR] [Pipeline] Failed to open camera device: demo.mp4
