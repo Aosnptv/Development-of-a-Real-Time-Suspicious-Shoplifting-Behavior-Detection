@@ -1,23 +1,53 @@
 # ui/dashboard_page.py
 import datetime
-import cv2
 from PySide6.QtWidgets import (QWidget, QVBoxLayout, QHBoxLayout, QLabel, 
-                               QGridLayout, QFrame)
+                               QGridLayout, QFrame, QSizePolicy, QComboBox)
 from PySide6.QtCore import Qt, QTimer
 from PySide6.QtGui import QFont, QImage, QPixmap
+import cv2
+from core.app_state import AppState
+
+class AspectRatioPixmapLabel(QLabel):
+    def __init__(self, text="", parent=None):
+        super().__init__(parent)
+        self.setText(text)
+        self.setAlignment(Qt.AlignmentFlag.AlignCenter)
+        self.raw_pixmap = None  
+        self.setSizePolicy(QSizePolicy.Policy.Ignored, QSizePolicy.Policy.Ignored)
+
+    def set_camera_pixmap(self, pixmap):
+        self.raw_pixmap = pixmap
+        self.update_scaled_pixmap()
+
+    def clear_camera(self, text, stylesheet=None):
+        self.raw_pixmap = None
+        self.setPixmap(QPixmap())
+        self.setText(text)
+        if stylesheet:
+            self.setStyleSheet(stylesheet)
+
+    def resizeEvent(self, event):
+        super().resizeEvent(event)
+        if self.raw_pixmap and not self.raw_pixmap.isNull():
+            self.update_scaled_pixmap()
+
+    def update_scaled_pixmap(self):
+        if self.raw_pixmap:
+            scaled = self.raw_pixmap.scaled(
+                self.size(),
+                Qt.AspectRatioMode.KeepAspectRatio,
+                Qt.TransformationMode.SmoothTransformation
+            )
+            super().setPixmap(scaled)
+
 
 class DashboardPage(QWidget):
     def __init__(self):
         super().__init__()
         self.setStyleSheet("background-color: #f8fafc;")
         
-        self.monitor_screens = []
-        
-        # 🟢 เปลี่ยนมาใช้ cv2.CAP_DSHOW ป้องกันอาการภาพติดซูมบน Windows OS
-        self.cap = cv2.VideoCapture(0, cv2.CAP_DSHOW)
-        if self.cap.isOpened():
-            self.cap.set(cv2.CAP_PROP_FRAME_WIDTH, 640)
-            self.cap.set(cv2.CAP_PROP_FRAME_HEIGHT, 480)
+        self.state = AppState()
+        self.monitor_slots = []
         
         layout = QVBoxLayout(self)
         layout.setContentsMargins(24, 24, 24, 24)
@@ -43,7 +73,7 @@ class DashboardPage(QWidget):
         layout.addLayout(stats_layout)
         
         # ─────────────── LIVE MONITORING GRID ───────────────
-        lbl_monitor = QLabel("Live System Monitor (Main Feed)")
+        lbl_monitor = QLabel("Live System Monitor (Select 2 of 10 Channels)")
         lbl_monitor.setFont(QFont("Segoe UI", 12, QFont.Weight.Bold))
         lbl_monitor.setStyleSheet("color: #334155; margin-top: 10px;")
         layout.addWidget(lbl_monitor)
@@ -58,20 +88,60 @@ class DashboardPage(QWidget):
             cam_box = QFrame()
             cam_box.setStyleSheet("background-color: #0f172a; border-radius: 6px;")
             box_lay = QVBoxLayout(cam_box)
-            box_lay.setContentsMargins(0, 0, 0, 0)
+            box_lay.setContentsMargins(8, 8, 8, 8)
+            box_lay.setSpacing(8)
             
-            lbl_scr = QLabel()
-            lbl_scr.setAlignment(Qt.AlignmentFlag.AlignCenter)
+            combo_cam = QComboBox()
+            combo_cam.setStyleSheet("""
+                QComboBox {
+                    background-color: #1e293b; color: #f8fafc;
+                    border: 1px solid #475569; border-radius: 4px;
+                    padding: 4px 8px; font-weight: bold;
+                }
+                QComboBox QAbstractItemView {
+                    background-color: #1e293b; color: #f8fafc;
+                    selection-background-color: #2563eb;
+                }
+            """)
+            
+            for ch in range(10):
+                combo_cam.addItem(f"🎥 Camera CH #{ch}", f"Camera_{ch}")
+            
+            combo_cam.setCurrentIndex(i)
+            box_lay.addWidget(combo_cam)
+            
+            lbl_scr = AspectRatioPixmapLabel()
+            lbl_scr.setStyleSheet("color: #64748b; font-size: 13px;")
             box_lay.addWidget(lbl_scr)
             
+            self.monitor_slots.append({
+                "combo": combo_cam,
+                "label": lbl_scr
+            })
+            
             self.grid_layout.addWidget(cam_box, 0, i)
-            self.monitor_screens.append(lbl_scr)
             
         layout.addWidget(grid_frame, stretch=1)
         
+        # 🟢 สร้าง Timer ไว้ แต่ยังไม่สั่ง .start() จนกว่าหน้า UI จะถูกเปิดขึ้นมาจริงๆ
         self.stream_timer = QTimer()
-        self.stream_timer.timeout.connect(self._render_real_camera_streams)
-        self.stream_timer.start(33)
+        self.stream_timer.timeout.connect(self._render_selected_streams)
+
+    # 🟢 [จุดเช็คสำคัญที่ 1]: ถ้าผู้ใช้งานเปิดสลับมาที่หน้าแรก (Dashboard)
+    def showEvent(self, event):
+        super().showEvent(event)
+        # สั่งให้ Timer เริ่มดึงข้อมูลกล้องทันที (ทำงานที่ 10 FPS)
+        self.stream_timer.start(100)
+
+    # 🟢 [จุดเช็คสำคัญที่ 2]: ถ้าสลับหนีไปหน้าอื่น (เช่น หน้ากล้องรวม หรือหน้าตั้งค่า)
+    def hideEvent(self, event):
+        super().hideEvent(event)
+        # สั่งหยุด Timer ทันที เพื่อไม่ให้กินทรัพยากรเครื่องในเบื้องหลัง
+        self.stream_timer.stop()
+        
+        # ล้างการจองหน่วยความจำภาพบนหน้าจอออกให้หมด
+        for slot in self.monitor_slots:
+            slot["label"].clear_camera("", "")
 
     def _create_stat_card(self, title, val, color):
         card = QFrame()
@@ -89,86 +159,32 @@ class DashboardPage(QWidget):
         lay.addWidget(v_lbl)
         return card
 
-    def _render_real_camera_streams(self):
-        if not self.monitor_screens:
-            return
+    def _render_selected_streams(self):
+        # ฟังก์ชันนี้จะทำงานเฉพาะตอนที่หน้า Dashboard แปะอยู่บนจอเท่านั้น
+        for slot in self.monitor_slots:
+            combo = slot["combo"]
+            lbl_screen = slot["label"]
+            selected_cam_key = combo.currentData()
             
-        if self.cap.isOpened():
-            ret, frame = self.cap.read()
-            if ret:
-                rgb_frame = cv2.cvtColor(frame, cv2.COLOR_BGR2RGB)
-                h, w, ch = rgb_frame.shape
-                bytes_per_line = ch * w
-                qt_img = QImage(rgb_frame.data, w, h, bytes_per_line, QImage.Format.Format_RGB888)
+            if selected_cam_key in self.state.camera_pool:
+                cam_data = self.state.camera_pool[selected_cam_key]
                 
-                for lbl_screen in self.monitor_screens:
-                    if lbl_screen.width() <= 0 or lbl_screen.height() <= 0:
-                        continue
-                    lbl_screen.setPixmap(QPixmap.fromImage(qt_img).scaled(
-                        lbl_screen.size(), 
-                        Qt.AspectRatioMode.KeepAspectRatio, 
-                        Qt.TransformationMode.SmoothTransformation
-                    ))
-            else:
-                for lbl_screen in self.monitor_screens:
-                    lbl_screen.setText("❌ NO SIGNAL (GRAB FAILED)")
-                    lbl_screen.setStyleSheet("color: white; background-color: #0f172a;")
-        else:
-            for lbl_screen in self.monitor_screens:
-                lbl_screen.setText("⚠️ CAMERA OCCUPIED BY MULTI-CAM PAGE")
-                lbl_screen.setStyleSheet("color: #eab308; background-color: #0f172a;")
-
-    def closeEvent(self, event):
-        if self.cap.isOpened():
-            self.cap.release()
-        event.accept()
-    
-    # เพิ่มการกำหนดค่าวิดีโอตั้งแต่แรกใน __init__ ครั้งเดียว และล็อกความละเอียดคงที่
-    def __init__(self):
-        super().__init__()
-        self.setStyleSheet("background-color: #f8fafc;")
-        self.monitor_screens = []
-        
-        # 🟢 เปิดกล้องและล็อกค่าทันที ไม่สลับหรือตั้งค่าซ้ำใน Loop
-        self.cap = cv2.VideoCapture(0, cv2.CAP_DSHOW)
-        if self.cap.isOpened():
-            self.cap.set(cv2.CAP_PROP_FRAME_WIDTH, 640)
-            self.cap.set(cv2.CAP_PROP_FRAME_HEIGHT, 480)
-            # 🔴 ปิดฟังก์ชัน Auto Focus และ Auto Zoom ของ Windows ที่ทำให้เลนส์ขยายเอง
-            self.cap.set(cv2.CAP_PROP_AUTOFOCUS, 0) 
+                if cam_data.get("online", False) and cam_data.get("frame") is not None:
+                    frame = cam_data["frame"]
+                    
+                    rgb_frame = cv2.cvtColor(frame, cv2.COLOR_BGR2RGB)
+                    h, w, ch = rgb_frame.shape
+                    bytes_per_line = ch * w
+                    
+                    qt_img = QImage(rgb_frame.data, w, h, bytes_per_line, QImage.Format.Format_RGB888)
+                    base_pixmap = QPixmap.fromImage(qt_img)
+                    
+                    lbl_screen.set_camera_pixmap(base_pixmap)
+                    continue
             
-        # ... (โค้ดสร้าง UI อื่น ๆ เหมือนเดิม) ...
-
-    def _render_real_camera_streams(self):
-        if not self.monitor_screens:
-            return
-            
-        if self.cap.isOpened():
-            ret, frame = self.cap.read()
-            if ret:
-                # แปลงสีปกติ
-                rgb_frame = cv2.cvtColor(frame, cv2.COLOR_BGR2RGB)
-                h, w, ch = rgb_frame.shape
-                bytes_per_line = ch * w
-                qt_img = QImage(rgb_frame.data, w, h, bytes_per_line, QImage.Format.Format_RGB888)
-                
-                # 🟢 จุดสำคัญ: บังคับแปลงเป็น QPixmap ขนาดฟิกซ์ตามสัดส่วนกล้อง 4:3 ก่อน 
-                # เพื่อป้องกันไม่ให้ระเบิดขนาดกล้องขยายตามขนาด Widget ที่กว้างขึ้นเรื่อย ๆ
-                base_pixmap = QPixmap.fromImage(qt_img)
-                
-                for lbl_screen in self.monitor_screens:
-                    if lbl_screen.width() <= 0 or lbl_screen.height() <= 0:
-                        continue
-                        
-                    # ล็อกสัดส่วนการย่อ/ขยายปลายทางอย่างเคร่งครัด (KeepAspectRatio)
-                    lbl_screen.setPixmap(base_pixmap.scaled(
-                        lbl_screen.size(), 
-                        Qt.AspectRatioMode.KeepAspectRatio, 
-                        Qt.TransformationMode.FastTransformation # เปลี่ยนเป็น Fast เพื่อเคลียร์ Buffer ตกค้าง
-                    ))
-            else:
-                for lbl_screen in self.monitor_screens:
-                    lbl_screen.setText("❌ NO SIGNAL")
-        else:
-            for lbl_screen in self.monitor_screens:
-                lbl_screen.setText("⚠️ CAMERA OCCUPIED")
+            if lbl_screen.raw_pixmap is not None or not lbl_screen.text():
+                cam_label_text = combo.currentText()
+                lbl_screen.clear_camera(
+                    f"{cam_label_text}\n[ Disconnected ]", 
+                    "color: #64748b; font-size: 13px; qproperty-alignment: AlignCenter;"
+                )
