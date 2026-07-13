@@ -3,7 +3,7 @@ psutil>=5.9.0
 # ===========================
 # Web Dashboard
 # ===========================
-streamlit>=1.46.0
+PySide6 pyqtgraph
 
 # ===========================
 # Data Processing
