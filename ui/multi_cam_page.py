@@ -85,6 +85,9 @@ class MultiCamPage(QWidget):
         self.grid_layout = QGridLayout(self.grid_container)
         self.grid_layout.setSpacing(12)
         self.grid_layout.setContentsMargins(0, 0, 0, 0)
+        
+        # จัดให้ตำแหน่ง Grid ยืดหยุ่นอยู่ตรงกลางเมื่อขนาดกล้องถูกล็อคคงที่
+        self.grid_layout.setAlignment(Qt.AlignmentFlag.AlignCenter) 
         layout.addWidget(self.grid_container, stretch=1)
         
         self._rebuild_camera_grid(0)
@@ -94,13 +97,14 @@ class MultiCamPage(QWidget):
         self.stream_timer.start(40) 
 
     def _rebuild_camera_grid(self, index):
-        # เคลียร์กล้องเก่าออกก่อนเปิดใหม่เพื่อไม่ให้ทับซ้อนกัน
+        # 1. ปิดพอร์ตกล้องเก่าทั้งหมดก่อนล้างสิทธิ์
         for cap in self.caps.values():
             if cap and cap.isOpened():
                 cap.release()
         self.caps.clear()
         self.camera_screens.clear()
         
+        # 2. ลบองค์ประกอบเก่าออกจาก Grid Layout
         for i in reversed(range(self.grid_layout.count())): 
             widget = self.grid_layout.itemAt(i).widget()
             if widget:
@@ -118,6 +122,7 @@ class MultiCamPage(QWidget):
             cam_box.setStyleSheet("background-color: #ffffff; border: 1px solid #e2e8f0; border-radius: 8px;")
             box_layout = QVBoxLayout(cam_box)
             box_layout.setContentsMargins(8, 8, 8, 8)
+            box_layout.setSizeConstraint(QVBoxLayout.SizeConstraint.SetFixedSize) # ล็อคขนาดกล่อง Frame ด้านนอก
             
             lbl_title = QLabel(f"CHANNEL {i+1:02d}")
             lbl_title.setStyleSheet("color: #0f172a; font-size: 11px; font-weight: bold;")
@@ -126,76 +131,25 @@ class MultiCamPage(QWidget):
             lbl_screen.setAlignment(Qt.AlignmentFlag.AlignCenter)
             lbl_screen.setStyleSheet("background-color: #0f172a; border-radius: 6px;")
             
+            # 🟢 [จุดแก้ไขสำคัญ] ล็อคขนาดหน้าจอของช่องกล้องให้คงที่ตายตัว (เช่น 480x360 พิกเซล)
+            lbl_screen.setFixedSize(480, 360) 
+            
             box_layout.addWidget(lbl_title)
-            box_layout.addWidget(lbl_screen, stretch=1)
+            box_layout.addWidget(lbl_screen)
             
             self.grid_layout.addWidget(cam_box, row, col)
             self.camera_screens.append(lbl_screen)
 
-            # 🟢 เปิดใช้งานผ่าน cv2.CAP_DSHOW เพื่อแก้ปัญหาภาพซูมผิดปกติบน Windows
-            # หากกล้อง 0 ถูก Dashboard ใช้ไปแล้ว ตัวนี้จะขยับไปเปิดกล้องถัดไป (เช่น กล้อง 1) อัตโนมัติ หรือถ้าไม่มีจะแสดง Error สวย ๆ ครับ
+            # 3. จัดการเปิดใช้งานฮาร์ดแวร์กล้องทีละตัว
             cam_index = i if i > 0 else 0 
             cap = cv2.VideoCapture(cam_index, cv2.CAP_DSHOW)
-            if cap.isOpened():
-                # ตั้งความละเอียดมาตรฐานเพื่อไม่ให้เลนส์เพี้ยน/ซูม
-                cap.set(cv2.CAP_PROP_FRAME_WIDTH, 640)
-                cap.set(cv2.CAP_PROP_FRAME_HEIGHT, 480)
-                self.caps[i] = cap
-            else:
-                # ถ้ากล้อง 0 โดนแย่ง ลองเปิดกล้องสำรองหรือข้ามไป
-                cap_alt = cv2.VideoCapture(cam_index + 1, cv2.CAP_DSHOW)
-                if cap_alt.isOpened():
-                    self.caps[i] = cap_alt
-
-    def _render_live_hardware_cameras(self):
-        for idx, lbl_screen in enumerate(self.camera_screens):
-            if lbl_screen.width() <= 0 or lbl_screen.height() <= 0:
-                continue
+            
+            if not cap.isOpened():
+                cap.release()
+                cap = cv2.VideoCapture(cam_index + 1, cv2.CAP_DSHOW)
                 
-            cap = self.caps.get(idx)
-            if cap and cap.isOpened():
-                ret, frame = cap.read()
-                if ret:
-                    rgb_frame = cv2.cvtColor(frame, cv2.COLOR_BGR2RGB)
-                    h, w, ch = rgb_frame.shape
-                    bytes_per_line = ch * w
-                    
-                    qt_img = QImage(rgb_frame.data, w, h, bytes_per_line, QImage.Format.Format_RGB888)
-                    lbl_screen.setPixmap(QPixmap.fromImage(qt_img).scaled(
-                        lbl_screen.size(), 
-                        Qt.AspectRatioMode.KeepAspectRatio, 
-                        Qt.TransformationMode.SmoothTransformation
-                    ))
-                else:
-                    lbl_screen.setText("⚠️ [OCCUPIED / NO SIGNAL]\nCamera is being used by Dashboard")
-                    lbl_screen.setStyleSheet("color: #f97316; font-size: 11px; font-weight: bold; background-color: #0f172a; qproperty-alignment: AlignCenter;")
-            else:
-                lbl_screen.setText("❌ CAMERA NOT AVAILABLE\n(In Use by Another Page)")
-                lbl_screen.setStyleSheet("color: #ef4444; font-size: 11px; font-weight: bold; background-color: #0f172a; qproperty-alignment: AlignCenter;")
-
-    def closeEvent(self, event):
-        for cap in self.caps.values():
-            if cap and cap.isOpened():
-                cap.release()
-        event.accept()
-    
-    def _rebuild_camera_grid(self, index):
-        # เคลียร์พอร์ตเก่าออกให้หมดก่อน
-        for cap in self.caps.values():
-            if cap and cap.isOpened():
-                cap.release()
-        self.caps.clear()
-        self.camera_screens.clear()
-        
-        # ... (โค้ดจัดการ Layout เหมือนเดิม) ...
-            
-        for i in range(num_cams):
-            # ... (สร้างเฟรมและป้ายชื่อเหมือนเดิม) ...
-            
-            cam_index = i if i > 0 else 0 
-            cap = cv2.VideoCapture(cam_index, cv2.CAP_DSHOW)
             if cap.isOpened():
-                # 🟢 ล็อคขนาดและปิดระบบออโต้ซูมระดับฮาร์ดแวร์เพื่อหยุดกล้องขยายตัวเอง
+                # ตั้งค่าความละเอียดและปิด Auto-Focus ที่ตัวกล้อง
                 cap.set(cv2.CAP_PROP_FRAME_WIDTH, 640)
                 cap.set(cv2.CAP_PROP_FRAME_HEIGHT, 480)
                 cap.set(cv2.CAP_PROP_AUTOFOCUS, 0)
@@ -217,35 +171,21 @@ class MultiCamPage(QWidget):
                     qt_img = QImage(rgb_frame.data, w, h, bytes_per_line, QImage.Format.Format_RGB888)
                     base_pixmap = QPixmap.fromImage(qt_img)
                     
-                    # 🟢 บังคับควบคุมขนาดการแสดงผลไม่ให้ฝั่งหน้าต่างบีบอัดภาพจนเกิดการซูมเลนส์
+                    # 🟢 เรนเดอร์ลงจอที่โดนล็อคขนาดไว้ พร้อมรักษาอัตราส่วนภาพไม่ให้ยืดเบี้ยว
                     lbl_screen.setPixmap(base_pixmap.scaled(
                         lbl_screen.size(), 
                         Qt.AspectRatioMode.KeepAspectRatio, 
-                        Qt.TransformationMode.FastTransformation
+                        Qt.TransformationMode.SmoothTransformation
                     ))
-    def _rebuild_camera_grid(self, index):
-        # เคลียร์พอร์ตเก่าออกให้หมดก่อน
+                else:
+                    lbl_screen.setText("⚠️ [OCCUPIED / NO SIGNAL]\nCamera is being used by Dashboard")
+                    lbl_screen.setStyleSheet("color: #f97316; font-size: 11px; font-weight: bold; background-color: #0f172a; qproperty-alignment: AlignCenter;")
+            else:
+                lbl_screen.setText("❌ CAMERA NOT AVAILABLE\n(In Use by Another Page)")
+                lbl_screen.setStyleSheet("color: #ef4444; font-size: 11px; font-weight: bold; background-color: #0f172a; qproperty-alignment: AlignCenter;")
+
+    def closeEvent(self, event):
         for cap in self.caps.values():
             if cap and cap.isOpened():
                 cap.release()
-        self.caps.clear()
-        self.camera_screens.clear()
-        
-        for i in reversed(range(self.grid_layout.count())): 
-            widget = self.grid_layout.itemAt(i).widget()
-            if widget:
-                widget.setParent(None)
-                widget.deleteLater()
-            
-        # 🟢 เติมบรรทัดนี้กลับเข้าไปครับ (ตัวแปรที่หายไป)
-        num_cams = index + 1
-        
-        # คำนวณจำนวนคอลัมน์ของ Grid กล้อง
-        cols = 1 if num_cams == 1 else (2 if num_cams <= 4 else (3 if num_cams <= 6 else 4))
-            
-        # ลูปสร้างกล้องจะกลับมาทำงานได้ปกติแล้วครับ
-        for i in range(num_cams):
-            row = i // cols
-            col = i % cols
-            
-            # ... (โค้ดสร้าง QFrame และเปิด cv2.VideoCapture ด้านล่างปล่อยไว้เหมือนเดิมได้เลย) ...
+        event.accept()
