@@ -50,3 +50,41 @@
 2026-07-13 04:27:04 [INFO] Camera 0 Started
 2026-07-13 04:27:04 [INFO] [Pipeline] Registering and initializing camera device ID: demo.mp4
 2026-07-13 04:27:04 [ERROR] [Pipeline] Failed to open camera device: demo.mp4
+2026-07-13 05:51:58 [INFO] [System] Initializing PySide6 Native GUI Desktop Engine...
+2026-07-13 05:51:59 [INFO] [System] Application fully started.
+2026-07-13 05:57:00 [INFO] [System] Initializing PySide6 Native GUI Desktop Engine...
+2026-07-13 05:57:00 [INFO] [System] Application fully started.
+2026-07-13 06:00:48 [INFO] [System] Initializing PySide6 Native GUI Desktop Engine...
+2026-07-13 06:00:48 [INFO] [System] Application fully started.
+2026-07-13 06:18:06 [INFO] [System] Initializing PySide6 Native GUI Desktop Engine...
+2026-07-13 06:20:11 [INFO] [System] Initializing PySide6 Native GUI Desktop Engine...
+2026-07-13 06:20:22 [INFO] [System] Initializing PySide6 Native GUI Desktop Engine...
+2026-07-13 06:21:53 [INFO] [System] Initializing PySide6 Native GUI Desktop Engine...
+2026-07-13 06:23:21 [INFO] [System] Initializing PySide6 Native GUI Desktop Engine...
+2026-07-13 06:23:21 [INFO] [System] Application fully started.
+2026-07-13 06:44:13 [INFO] ============== STARTING APPLICATION ==============
+2026-07-13 06:44:13 [INFO] [Camera Thread] Open Webcam ID: 0
+2026-07-13 06:44:13 [INFO] [Camera Thread] Open Webcam ID: 0
+2026-07-13 06:49:10 [INFO] ============== STARTING APPLICATION ==============
+2026-07-13 06:49:10 [INFO] [Camera Thread] Open Webcam ID: 0
+2026-07-13 06:49:11 [INFO] [Camera Thread] Open Webcam ID: 0
+2026-07-13 06:51:19 [INFO] ============== STARTING APPLICATION ==============
+2026-07-13 06:51:19 [INFO] [Camera Thread] Open Webcam ID: 0
+2026-07-13 06:51:19 [INFO] [Camera Thread] Open Webcam ID: 0
+2026-07-13 07:00:35 [INFO] ============== STARTING APPLICATION ==============
+2026-07-13 07:01:28 [INFO] ============== STARTING APPLICATION ==============
+2026-07-13 07:02:15 [INFO] ============== STARTING APPLICATION ==============
+2026-07-13 07:10:20 [INFO] ============== STARTING APPLICATION ==============
+2026-07-13 07:11:43 [INFO] ============== STARTING APPLICATION ==============
+2026-07-13 07:22:41 [INFO] ============== STARTING APPLICATION ==============
+2026-07-13 07:24:40 [INFO] ============== STARTING APPLICATION ==============
+2026-07-13 07:26:41 [INFO] ============== STARTING APPLICATION ==============
+2026-07-13 07:28:50 [INFO] ============== STARTING APPLICATION ==============
+2026-07-13 07:29:49 [INFO] ============== STARTING APPLICATION ==============
+2026-07-13 07:30:33 [INFO] ============== STARTING APPLICATION ==============
+2026-07-13 07:33:39 [INFO] ============== STARTING APPLICATION ==============
+2026-07-13 07:35:11 [INFO] ============== STARTING APPLICATION ==============
+2026-07-13 07:36:48 [INFO] ============== STARTING APPLICATION ==============
+2026-07-13 07:38:21 [INFO] ============== STARTING APPLICATION ==============
+2026-07-13 07:38:43 [INFO] ============== STARTING APPLICATION ==============
+2026-07-13 07:40:03 [INFO] ============== STARTING APPLICATION ==============
