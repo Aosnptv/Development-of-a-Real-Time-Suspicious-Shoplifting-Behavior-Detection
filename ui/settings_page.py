@@ -1,67 +1,58 @@
-# ui/settings_page.py
-from PySide6.QtWidgets import (QWidget, QVBoxLayout, QHBoxLayout, QFormLayout, QLabel, 
-                               QLineEdit, QPushButton, QFrame, QMessageBox)
+from PySide6.QtWidgets import QWidget, QVBoxLayout, QLabel, QLineEdit, QPushButton, QGroupBox
 from PySide6.QtCore import Qt
-from PySide6.QtGui import QFont
 
 class SettingsPage(QWidget):
     def __init__(self):
         super().__init__()
-        self.setAttribute(Qt.WidgetAttribute.WA_StyledBackground, True)
-        self.setStyleSheet("background-color: #f8fafc;")
-        
         layout = QVBoxLayout(self)
-        layout.setContentsMargins(24, 24, 24, 24)
+        layout.setAlignment(Qt.AlignTop)
+        layout.setContentsMargins(30, 30, 30, 30)
+        layout.setSpacing(20)
         
-        header = QLabel("⚙️ SYSTEM SETTINGS")
-        header.setFont(QFont("Segoe UI", 16, QFont.Weight.Bold))
-        header.setStyleSheet("color: #0f172a; margin-bottom: 10px;")
-        layout.addWidget(header)
+        self.title = QLabel("⚙️ Telegram Notifications Settings")
+        layout.addWidget(self.title)
         
-        # กรอบฟอร์มการตั้งค่า Telegram
-        form_frame = QFrame()
-        form_frame.setStyleSheet("background-color: #ffffff; border: 1px solid #e2e8f0; border-radius: 8px;")
-        form_layout = QFormLayout(form_frame)
-        form_layout.setContentsMargins(24, 24, 24, 24)
-        form_layout.setVerticalSpacing(16)
+        self.group_box = QGroupBox("Bot Configuration")
+        form_layout = QVBoxLayout(self.group_box)
+        form_layout.setContentsMargins(20, 25, 20, 20)
+        form_layout.setSpacing(10)
         
-        section_title = QLabel("Telegram Notification API Config")
-        section_title.setFont(QFont("Segoe UI", 12, QFont.Weight.Bold))
-        section_title.setStyleSheet("color: #2563eb; margin-bottom: 10px;")
-        form_layout.addRow(section_title)
+        self.lbl_token = QLabel("Telegram Bot Token:")
+        self.input_token = QLineEdit()
+        self.input_token.setPlaceholderText("Enter your bot token...")
+        self.input_token.setMaximumWidth(450)
         
-        # ช่องกรอกข้อมูล
-        self.txt_token = QLineEdit()
-        self.txt_token.setPlaceholderText("Enter Telegram Bot API Token")
-        self.txt_token.setStyleSheet("padding: 8px; border: 1px solid #cbd5e1; border-radius: 6px; color: #0f172a;")
+        self.lbl_chatid = QLabel("Target Chat ID:")
+        self.input_chatid = QLineEdit()
+        self.input_chatid.setPlaceholderText("Enter target chat ID...")
+        self.input_chatid.setMaximumWidth(450)
         
-        self.txt_chat_id = QLineEdit()
-        self.txt_chat_id.setPlaceholderText("Enter Target Chat ID or Group ID")
-        self.txt_chat_id.setStyleSheet("padding: 8px; border: 1px solid #cbd5e1; border-radius: 6px; color: #0f172a;")
+        self.btn_save = QPushButton("💾 Save Configuration")
+        self.btn_save.setMaximumWidth(160)
         
-        form_layout.addRow(QLabel("Bot Token:"), self.txt_token)
-        form_layout.addRow(QLabel("Chat ID:"), self.txt_chat_id)
+        form_layout.addWidget(self.lbl_token)
+        form_layout.addWidget(self.input_token)
+        form_layout.addSpacing(10)
+        form_layout.addWidget(self.lbl_chatid)
+        form_layout.addWidget(self.input_chatid)
+        form_layout.addSpacing(15)
+        form_layout.addWidget(self.btn_save)
         
-        # ปุ่มกด (จัดแนวนอนด้วย QHBoxLayout)
-        btn_layout = QHBoxLayout()
-        self.btn_test = QPushButton("⚡ Test Connection")
-        self.btn_test.setStyleSheet("background-color: #ea580c; color: white; padding: 8px 16px; border-radius: 6px; font-weight: bold;")
-        self.btn_test.clicked.connect(self._test_telegram)
-        
-        self.btn_save = QPushButton("💾 Save Settings")
-        self.btn_save.setStyleSheet("background-color: #16a34a; color: white; padding: 8px 24px; border-radius: 6px; font-weight: bold;")
-        self.btn_save.clicked.connect(self._save_settings)
-        
-        btn_layout.addWidget(self.btn_test)
-        btn_layout.addStretch()
-        btn_layout.addWidget(self.btn_save)
-        
-        form_layout.addRow("", btn_layout)
-        layout.addWidget(form_frame)
-        layout.addStretch()
+        layout.addWidget(self.group_box)
 
-    def _save_settings(self):
-        QMessageBox.information(self, "Success", "Telegram configuration saved successfully!")
-
-    def _test_telegram(self):
-        QMessageBox.information(self, "API Test", "Test alert payload injected!\nPlease check your Telegram channel.")
+    def set_theme(self, is_dark_mode):
+        fg = "white" if is_dark_mode else "black"
+        bg_card = "#1e293b" if is_dark_mode else "#ffffff"
+        border = "#334155" if is_dark_mode else "#cbd5e1"
+        
+        self.title.setStyleSheet(f"color: {fg}; font-size: 20px; font-weight: bold;")
+        self.group_box.setStyleSheet(f"QGroupBox {{ color: #38bdf8; font-weight: bold; border: 1px solid {border}; border-radius: 6px; margin-top: 10px; background-color: {bg_card}; }} QGroupBox::title {{ subcontrol-origin: margin; left: 10px; padding: 0 5px; }}")
+        
+        self.lbl_token.setStyleSheet(f"color: {fg}; font-weight: bold;")
+        self.lbl_chatid.setStyleSheet(f"color: {fg}; font-weight: bold;")
+        
+        input_style = f"background-color: {'#0f172a' if is_dark_mode else '#f1f5f9'}; color: {fg}; padding: 8px; border: 1px solid {border}; border-radius: 4px;"
+        self.input_token.setStyleSheet(input_style)
+        self.input_chatid.setStyleSheet(input_style)
+        
+        self.btn_save.setStyleSheet("background-color: #2563eb; color: white; font-weight: bold; padding: 10px; border-radius: 4px;")
