@@ -4,8 +4,8 @@ import requests
 class TelegramService:
     def __init__(self, token=None, chat_id=None):
         # 🟢 แนะนำให้เอาคีย์ไปใส่ใน config.json หรือใส่ตรงนี้ชั่วคราวเพื่อเทสต์ก่อนได้ครับ
-        self.token = token or "8695580720:AAE8oo5qpXJZrjEApC0PblsD4a1i8-iZ4Dg"
-        self.chat_id = chat_id or "7626572623"
+        self.token = token or "token"#8695580720:AAE8oo5qpXJZrjEApC0PblsD4a1i8-iZ4Dg
+        self.chat_id = chat_id or "id"#7626572623
         self.api_url = f"https://api.telegram.org/bot{self.token}"
 
     def send_message(self, text):
