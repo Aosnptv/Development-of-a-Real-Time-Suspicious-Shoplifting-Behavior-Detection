@@ -1,0 +1,322 @@
+[2026-07-15 02:26:38] [INFO] [DatabaseService] - ตรวจสอบ/สร้างตารางฐานข้อมูลสำเร็จ
+[2026-07-15 02:26:38] [INFO] [AIService] - กำลังโหลดโมเดล YOLO จาก: models/shoplifting_yolov8.pt
+[2026-07-15 02:26:39] [ERROR] [AIService] - เกิดข้อผิดพลาดในการโหลดโมเดล: [Errno 2] No such file or directory: 'models\\shoplifting_yolov8.pt'
+[2026-07-15 02:26:39] [INFO] [DatabaseService] - ตรวจสอบ/สร้างตารางฐานข้อมูลสำเร็จ
+[2026-07-15 02:26:39] [INFO] [AIService] - กำลังโหลดโมเดล YOLO จาก: models/shoplifting_yolov8.pt
+[2026-07-15 02:26:39] [ERROR] [AIService] - เกิดข้อผิดพลาดในการโหลดโมเดล: [Errno 2] No such file or directory: 'models\\shoplifting_yolov8.pt'
+[2026-07-15 02:26:39] [INFO] [DatabaseService] - ตรวจสอบ/สร้างตารางฐานข้อมูลสำเร็จ
+[2026-07-15 02:26:39] [INFO] [AIService] - กำลังโหลดโมเดล YOLO จาก: models/shoplifting_yolov8.pt
+[2026-07-15 02:26:39] [ERROR] [AIService] - เกิดข้อผิดพลาดในการโหลดโมเดล: [Errno 2] No such file or directory: 'models\\shoplifting_yolov8.pt'
+[2026-07-15 02:26:39] [INFO] [DatabaseService] - ตรวจสอบ/สร้างตารางฐานข้อมูลสำเร็จ
+[2026-07-15 02:26:39] [INFO] [AIService] - กำลังโหลดโมเดล YOLO จาก: models/shoplifting_yolov8.pt
+[2026-07-15 02:26:40] [ERROR] [AIService] - เกิดข้อผิดพลาดในการโหลดโมเดล: [Errno 2] No such file or directory: 'models\\shoplifting_yolov8.pt'
+[2026-07-15 02:26:40] [INFO] [DatabaseService] - ตรวจสอบ/สร้างตารางฐานข้อมูลสำเร็จ
+[2026-07-15 02:30:27] [INFO] [DatabaseService] - ตรวจสอบ/สร้างตารางฐานข้อมูลสำเร็จ
+[2026-07-15 02:30:27] [INFO] [AIService] - กำลังโหลดโมเดล YOLO จาก: models/shoplifting_yolov8.pt
+[2026-07-15 02:30:28] [ERROR] [AIService] - เกิดข้อผิดพลาดในการโหลดโมเดล: [Errno 2] No such file or directory: 'models\\shoplifting_yolov8.pt'
+[2026-07-15 02:30:28] [INFO] [DatabaseService] - ตรวจสอบ/สร้างตารางฐานข้อมูลสำเร็จ
+[2026-07-15 02:30:28] [INFO] [AIService] - กำลังโหลดโมเดล YOLO จาก: models/shoplifting_yolov8.pt
+[2026-07-15 02:30:28] [ERROR] [AIService] - เกิดข้อผิดพลาดในการโหลดโมเดล: [Errno 2] No such file or directory: 'models\\shoplifting_yolov8.pt'
+[2026-07-15 02:30:28] [INFO] [DatabaseService] - ตรวจสอบ/สร้างตารางฐานข้อมูลสำเร็จ
+[2026-07-15 02:30:28] [INFO] [AIService] - กำลังโหลดโมเดล YOLO จาก: models/shoplifting_yolov8.pt
+[2026-07-15 02:30:28] [ERROR] [AIService] - เกิดข้อผิดพลาดในการโหลดโมเดล: [Errno 2] No such file or directory: 'models\\shoplifting_yolov8.pt'
+[2026-07-15 02:30:28] [INFO] [DatabaseService] - ตรวจสอบ/สร้างตารางฐานข้อมูลสำเร็จ
+[2026-07-15 02:30:28] [INFO] [AIService] - กำลังโหลดโมเดล YOLO จาก: models/shoplifting_yolov8.pt
+[2026-07-15 02:30:29] [ERROR] [AIService] - เกิดข้อผิดพลาดในการโหลดโมเดล: [Errno 2] No such file or directory: 'models\\shoplifting_yolov8.pt'
+[2026-07-15 02:30:29] [INFO] [DatabaseService] - ตรวจสอบ/สร้างตารางฐานข้อมูลสำเร็จ
+[2026-07-15 02:31:01] [INFO] [DatabaseService] - ตรวจสอบ/สร้างตารางฐานข้อมูลสำเร็จ
+[2026-07-15 02:31:01] [INFO] [AIService] - กำลังโหลดโมเดล YOLO จาก: models/shoplifting_yolov8.pt
+[2026-07-15 02:31:01] [ERROR] [AIService] - เกิดข้อผิดพลาดในการโหลดโมเดล: [Errno 2] No such file or directory: 'models\\shoplifting_yolov8.pt'
+[2026-07-15 02:31:47] [INFO] [DatabaseService] - ตรวจสอบ/สร้างตารางฐานข้อมูลสำเร็จ
+[2026-07-15 02:31:47] [INFO] [AIService] - กำลังโหลดโมเดล YOLO จาก: models/shoplifting_yolov8.pt
+[2026-07-15 02:31:48] [ERROR] [AIService] - เกิดข้อผิดพลาดในการโหลดโมเดล: [Errno 2] No such file or directory: 'models\\shoplifting_yolov8.pt'
+[2026-07-15 02:31:48] [INFO] [DatabaseService] - ตรวจสอบ/สร้างตารางฐานข้อมูลสำเร็จ
+[2026-07-15 02:31:48] [INFO] [AIService] - กำลังโหลดโมเดล YOLO จาก: models/shoplifting_yolov8.pt
+[2026-07-15 02:31:49] [ERROR] [AIService] - เกิดข้อผิดพลาดในการโหลดโมเดล: [Errno 2] No such file or directory: 'models\\shoplifting_yolov8.pt'
+[2026-07-15 02:31:49] [INFO] [DatabaseService] - ตรวจสอบ/สร้างตารางฐานข้อมูลสำเร็จ
+[2026-07-15 02:31:49] [INFO] [AIService] - กำลังโหลดโมเดล YOLO จาก: models/shoplifting_yolov8.pt
+[2026-07-15 02:31:49] [ERROR] [AIService] - เกิดข้อผิดพลาดในการโหลดโมเดล: [Errno 2] No such file or directory: 'models\\shoplifting_yolov8.pt'
+[2026-07-15 02:31:49] [INFO] [DatabaseService] - ตรวจสอบ/สร้างตารางฐานข้อมูลสำเร็จ
+[2026-07-15 02:31:49] [INFO] [AIService] - กำลังโหลดโมเดล YOLO จาก: models/shoplifting_yolov8.pt
+[2026-07-15 02:31:50] [ERROR] [AIService] - เกิดข้อผิดพลาดในการโหลดโมเดล: [Errno 2] No such file or directory: 'models\\shoplifting_yolov8.pt'
+[2026-07-15 02:31:50] [INFO] [DatabaseService] - ตรวจสอบ/สร้างตารางฐานข้อมูลสำเร็จ
+[2026-07-15 02:32:11] [INFO] [DatabaseService] - ตรวจสอบ/สร้างตารางฐานข้อมูลสำเร็จ
+[2026-07-15 02:32:11] [INFO] [AIService] - กำลังโหลดโมเดล YOLO จาก: models/shoplifting_yolov8.pt
+[2026-07-15 02:32:11] [ERROR] [AIService] - เกิดข้อผิดพลาดในการโหลดโมเดล: [Errno 2] No such file or directory: 'models\\shoplifting_yolov8.pt'
+[2026-07-15 02:32:11] [INFO] [DatabaseService] - ตรวจสอบ/สร้างตารางฐานข้อมูลสำเร็จ
+[2026-07-15 02:32:11] [INFO] [AIService] - กำลังโหลดโมเดล YOLO จาก: models/shoplifting_yolov8.pt
+[2026-07-15 02:32:12] [ERROR] [AIService] - เกิดข้อผิดพลาดในการโหลดโมเดล: [Errno 2] No such file or directory: 'models\\shoplifting_yolov8.pt'
+[2026-07-15 02:32:12] [INFO] [DatabaseService] - ตรวจสอบ/สร้างตารางฐานข้อมูลสำเร็จ
+[2026-07-15 02:32:12] [INFO] [AIService] - กำลังโหลดโมเดล YOLO จาก: models/shoplifting_yolov8.pt
+[2026-07-15 02:32:12] [ERROR] [AIService] - เกิดข้อผิดพลาดในการโหลดโมเดล: [Errno 2] No such file or directory: 'models\\shoplifting_yolov8.pt'
+[2026-07-15 02:32:12] [INFO] [DatabaseService] - ตรวจสอบ/สร้างตารางฐานข้อมูลสำเร็จ
+[2026-07-15 02:32:12] [INFO] [AIService] - กำลังโหลดโมเดล YOLO จาก: models/shoplifting_yolov8.pt
+[2026-07-15 02:32:13] [ERROR] [AIService] - เกิดข้อผิดพลาดในการโหลดโมเดล: [Errno 2] No such file or directory: 'models\\shoplifting_yolov8.pt'
+[2026-07-15 02:32:13] [INFO] [DatabaseService] - ตรวจสอบ/สร้างตารางฐานข้อมูลสำเร็จ
+[2026-07-15 02:32:46] [INFO] [DatabaseService] - ตรวจสอบ/สร้างตารางฐานข้อมูลสำเร็จ
+[2026-07-15 02:32:46] [INFO] [AIService] - กำลังโหลดโมเดล YOLO จาก: models/shoplifting_yolov8.pt
+[2026-07-15 02:32:46] [ERROR] [AIService] - เกิดข้อผิดพลาดในการโหลดโมเดล: [Errno 2] No such file or directory: 'models\\shoplifting_yolov8.pt'
+[2026-07-15 02:32:46] [INFO] [DatabaseService] - ตรวจสอบ/สร้างตารางฐานข้อมูลสำเร็จ
+[2026-07-15 02:32:46] [INFO] [AIService] - กำลังโหลดโมเดล YOLO จาก: models/shoplifting_yolov8.pt
+[2026-07-15 02:32:46] [ERROR] [AIService] - เกิดข้อผิดพลาดในการโหลดโมเดล: [Errno 2] No such file or directory: 'models\\shoplifting_yolov8.pt'
+[2026-07-15 02:32:46] [INFO] [DatabaseService] - ตรวจสอบ/สร้างตารางฐานข้อมูลสำเร็จ
+[2026-07-15 02:32:46] [INFO] [AIService] - กำลังโหลดโมเดล YOLO จาก: models/shoplifting_yolov8.pt
+[2026-07-15 02:32:47] [ERROR] [AIService] - เกิดข้อผิดพลาดในการโหลดโมเดล: [Errno 2] No such file or directory: 'models\\shoplifting_yolov8.pt'
+[2026-07-15 02:32:47] [INFO] [DatabaseService] - ตรวจสอบ/สร้างตารางฐานข้อมูลสำเร็จ
+[2026-07-15 02:32:47] [INFO] [AIService] - กำลังโหลดโมเดล YOLO จาก: models/shoplifting_yolov8.pt
+[2026-07-15 02:32:47] [ERROR] [AIService] - เกิดข้อผิดพลาดในการโหลดโมเดล: [Errno 2] No such file or directory: 'models\\shoplifting_yolov8.pt'
+[2026-07-15 02:32:47] [INFO] [DatabaseService] - ตรวจสอบ/สร้างตารางฐานข้อมูลสำเร็จ
+[2026-07-15 02:36:13] [INFO] [DatabaseService] - ตรวจสอบ/สร้างตารางฐานข้อมูลสำเร็จ
+[2026-07-15 02:36:13] [INFO] [AIService] - กำลังโหลดโมเดล YOLO จาก: models/shoplifting_yolov8.pt
+[2026-07-15 02:36:14] [ERROR] [AIService] - เกิดข้อผิดพลาดในการโหลดโมเดล: [Errno 2] No such file or directory: 'models\\shoplifting_yolov8.pt'
+[2026-07-15 02:36:14] [INFO] [DatabaseService] - ตรวจสอบ/สร้างตารางฐานข้อมูลสำเร็จ
+[2026-07-15 02:36:14] [INFO] [AIService] - กำลังโหลดโมเดล YOLO จาก: models/shoplifting_yolov8.pt
+[2026-07-15 02:36:15] [ERROR] [AIService] - เกิดข้อผิดพลาดในการโหลดโมเดล: [Errno 2] No such file or directory: 'models\\shoplifting_yolov8.pt'
+[2026-07-15 02:36:44] [INFO] [DatabaseService] - ตรวจสอบ/สร้างตารางฐานข้อมูลสำเร็จ
+[2026-07-15 02:36:44] [INFO] [AIService] - กำลังโหลดโมเดล YOLO จาก: models/shoplifting_yolov8.pt
+[2026-07-15 02:36:44] [ERROR] [AIService] - เกิดข้อผิดพลาดในการโหลดโมเดล: [Errno 2] No such file or directory: 'models\\shoplifting_yolov8.pt'
+[2026-07-15 02:36:44] [INFO] [DatabaseService] - ตรวจสอบ/สร้างตารางฐานข้อมูลสำเร็จ
+[2026-07-15 02:36:44] [INFO] [AIService] - กำลังโหลดโมเดล YOLO จาก: models/shoplifting_yolov8.pt
+[2026-07-15 02:36:45] [ERROR] [AIService] - เกิดข้อผิดพลาดในการโหลดโมเดล: [Errno 2] No such file or directory: 'models\\shoplifting_yolov8.pt'
+[2026-07-15 02:38:11] [INFO] [DatabaseService] - ตรวจสอบ/สร้างตารางฐานข้อมูลสำเร็จ
+[2026-07-15 02:38:11] [INFO] [AIService] - กำลังโหลดโมเดล YOLO จาก: models/shoplifting_yolov8.pt
+[2026-07-15 02:38:12] [ERROR] [AIService] - เกิดข้อผิดพลาดในการโหลดโมเดล: [Errno 2] No such file or directory: 'models\\shoplifting_yolov8.pt'
+[2026-07-15 02:38:12] [INFO] [DatabaseService] - ตรวจสอบ/สร้างตารางฐานข้อมูลสำเร็จ
+[2026-07-15 02:38:12] [INFO] [AIService] - กำลังโหลดโมเดล YOLO จาก: models/shoplifting_yolov8.pt
+[2026-07-15 02:38:13] [ERROR] [AIService] - เกิดข้อผิดพลาดในการโหลดโมเดล: [Errno 2] No such file or directory: 'models\\shoplifting_yolov8.pt'
+[2026-07-15 02:38:13] [INFO] [DatabaseService] - ตรวจสอบ/สร้างตารางฐานข้อมูลสำเร็จ
+[2026-07-15 02:38:13] [INFO] [DatabaseService] - ตรวจสอบ/สร้างตารางฐานข้อมูลสำเร็จ
+[2026-07-15 02:38:13] [INFO] [AIService] - กำลังโหลดโมเดล YOLO จาก: models/shoplifting_yolov8.pt
+[2026-07-15 02:38:13] [ERROR] [AIService] - เกิดข้อผิดพลาดในการโหลดโมเดล: [Errno 2] No such file or directory: 'models\\shoplifting_yolov8.pt'
+[2026-07-15 02:38:13] [INFO] [DatabaseService] - ตรวจสอบ/สร้างตารางฐานข้อมูลสำเร็จ
+[2026-07-15 02:38:13] [INFO] [AIService] - กำลังโหลดโมเดล YOLO จาก: models/shoplifting_yolov8.pt
+[2026-07-15 02:38:13] [ERROR] [AIService] - เกิดข้อผิดพลาดในการโหลดโมเดล: [Errno 2] No such file or directory: 'models\\shoplifting_yolov8.pt'
+[2026-07-15 02:38:13] [INFO] [DatabaseService] - ตรวจสอบ/สร้างตารางฐานข้อมูลสำเร็จ
+[2026-07-15 02:41:27] [INFO] [DatabaseService] - ตรวจสอบ/สร้างตารางฐานข้อมูลสำเร็จ
+[2026-07-15 02:41:27] [INFO] [AIService] - กำลังโหลดโมเดล YOLO จาก: models/shoplifting_yolov8.pt
+[2026-07-15 02:41:27] [ERROR] [AIService] - เกิดข้อผิดพลาดในการโหลดโมเดล: [Errno 2] No such file or directory: 'models\\shoplifting_yolov8.pt'
+[2026-07-15 02:41:27] [INFO] [DatabaseService] - ตรวจสอบ/สร้างตารางฐานข้อมูลสำเร็จ
+[2026-07-15 02:41:27] [INFO] [AIService] - กำลังโหลดโมเดล YOLO จาก: models/shoplifting_yolov8.pt
+[2026-07-15 02:41:28] [ERROR] [AIService] - เกิดข้อผิดพลาดในการโหลดโมเดล: [Errno 2] No such file or directory: 'models\\shoplifting_yolov8.pt'
+[2026-07-15 02:41:28] [INFO] [DatabaseService] - ตรวจสอบ/สร้างตารางฐานข้อมูลสำเร็จ
+[2026-07-15 02:44:32] [INFO] [DatabaseService] - ตรวจสอบ/สร้างตารางฐานข้อมูลสำเร็จ
+[2026-07-15 02:44:32] [INFO] [AIService] - กำลังโหลดโมเดล YOLO จาก: models/shoplifting_yolov8.pt
+[2026-07-15 02:44:33] [ERROR] [AIService] - เกิดข้อผิดพลาดในการโหลดโมเดล: [Errno 2] No such file or directory: 'models\\shoplifting_yolov8.pt'
+[2026-07-15 02:44:33] [INFO] [DatabaseService] - ตรวจสอบ/สร้างตารางฐานข้อมูลสำเร็จ
+[2026-07-15 02:44:33] [INFO] [AIService] - กำลังโหลดโมเดล YOLO จาก: models/shoplifting_yolov8.pt
+[2026-07-15 02:44:33] [ERROR] [AIService] - เกิดข้อผิดพลาดในการโหลดโมเดล: [Errno 2] No such file or directory: 'models\\shoplifting_yolov8.pt'
+[2026-07-15 02:44:33] [INFO] [DatabaseService] - ตรวจสอบ/สร้างตารางฐานข้อมูลสำเร็จ
+[2026-07-15 02:44:33] [INFO] [DatabaseService] - ตรวจสอบ/สร้างตารางฐานข้อมูลสำเร็จ
+[2026-07-15 02:44:33] [INFO] [AIService] - กำลังโหลดโมเดล YOLO จาก: models/shoplifting_yolov8.pt
+[2026-07-15 02:44:34] [ERROR] [AIService] - เกิดข้อผิดพลาดในการโหลดโมเดล: [Errno 2] No such file or directory: 'models\\shoplifting_yolov8.pt'
+[2026-07-15 02:44:34] [INFO] [DatabaseService] - ตรวจสอบ/สร้างตารางฐานข้อมูลสำเร็จ
+[2026-07-15 02:44:34] [INFO] [AIService] - กำลังโหลดโมเดล YOLO จาก: models/shoplifting_yolov8.pt
+[2026-07-15 02:44:34] [ERROR] [AIService] - เกิดข้อผิดพลาดในการโหลดโมเดล: [Errno 2] No such file or directory: 'models\\shoplifting_yolov8.pt'
+[2026-07-15 02:44:34] [INFO] [DatabaseService] - ตรวจสอบ/สร้างตารางฐานข้อมูลสำเร็จ
+[2026-07-15 02:45:25] [INFO] [DatabaseService] - ตรวจสอบ/สร้างตารางฐานข้อมูลสำเร็จ
+[2026-07-15 02:45:25] [INFO] [AIService] - กำลังโหลดโมเดล YOLO จาก: models/shoplifting_yolov8.pt
+[2026-07-15 02:45:26] [ERROR] [AIService] - เกิดข้อผิดพลาดในการโหลดโมเดล: [Errno 2] No such file or directory: 'models\\shoplifting_yolov8.pt'
+[2026-07-15 02:45:26] [INFO] [DatabaseService] - ตรวจสอบ/สร้างตารางฐานข้อมูลสำเร็จ
+[2026-07-15 02:45:26] [INFO] [AIService] - กำลังโหลดโมเดล YOLO จาก: models/shoplifting_yolov8.pt
+[2026-07-15 02:45:26] [ERROR] [AIService] - เกิดข้อผิดพลาดในการโหลดโมเดล: [Errno 2] No such file or directory: 'models\\shoplifting_yolov8.pt'
+[2026-07-15 02:45:26] [INFO] [DatabaseService] - ตรวจสอบ/สร้างตารางฐานข้อมูลสำเร็จ
+[2026-07-15 02:45:26] [INFO] [DatabaseService] - ตรวจสอบ/สร้างตารางฐานข้อมูลสำเร็จ
+[2026-07-15 02:45:26] [INFO] [AIService] - กำลังโหลดโมเดล YOLO จาก: models/shoplifting_yolov8.pt
+[2026-07-15 02:45:27] [ERROR] [AIService] - เกิดข้อผิดพลาดในการโหลดโมเดล: [Errno 2] No such file or directory: 'models\\shoplifting_yolov8.pt'
+[2026-07-15 02:45:27] [INFO] [DatabaseService] - ตรวจสอบ/สร้างตารางฐานข้อมูลสำเร็จ
+[2026-07-15 02:45:27] [INFO] [AIService] - กำลังโหลดโมเดล YOLO จาก: models/shoplifting_yolov8.pt
+[2026-07-15 02:45:27] [ERROR] [AIService] - เกิดข้อผิดพลาดในการโหลดโมเดล: [Errno 2] No such file or directory: 'models\\shoplifting_yolov8.pt'
+[2026-07-15 02:45:27] [INFO] [DatabaseService] - ตรวจสอบ/สร้างตารางฐานข้อมูลสำเร็จ
+[2026-07-15 02:46:15] [INFO] [DatabaseService] - ตรวจสอบ/สร้างตารางฐานข้อมูลสำเร็จ
+[2026-07-15 02:46:15] [INFO] [AIService] - กำลังโหลดโมเดล YOLO จาก: models/shoplifting_yolov8.pt
+[2026-07-15 02:46:16] [ERROR] [AIService] - เกิดข้อผิดพลาดในการโหลดโมเดล: [Errno 2] No such file or directory: 'models\\shoplifting_yolov8.pt'
+[2026-07-15 02:46:16] [INFO] [DatabaseService] - ตรวจสอบ/สร้างตารางฐานข้อมูลสำเร็จ
+[2026-07-15 02:46:16] [INFO] [AIService] - กำลังโหลดโมเดล YOLO จาก: models/shoplifting_yolov8.pt
+[2026-07-15 02:46:17] [ERROR] [AIService] - เกิดข้อผิดพลาดในการโหลดโมเดล: [Errno 2] No such file or directory: 'models\\shoplifting_yolov8.pt'
+[2026-07-15 02:46:17] [INFO] [DatabaseService] - ตรวจสอบ/สร้างตารางฐานข้อมูลสำเร็จ
+[2026-07-15 02:46:17] [INFO] [DatabaseService] - ตรวจสอบ/สร้างตารางฐานข้อมูลสำเร็จ
+[2026-07-15 02:46:17] [INFO] [AIService] - กำลังโหลดโมเดล YOLO จาก: models/shoplifting_yolov8.pt
+[2026-07-15 02:46:17] [ERROR] [AIService] - เกิดข้อผิดพลาดในการโหลดโมเดล: [Errno 2] No such file or directory: 'models\\shoplifting_yolov8.pt'
+[2026-07-15 02:46:17] [INFO] [DatabaseService] - ตรวจสอบ/สร้างตารางฐานข้อมูลสำเร็จ
+[2026-07-15 02:46:17] [INFO] [AIService] - กำลังโหลดโมเดล YOLO จาก: models/shoplifting_yolov8.pt
+[2026-07-15 02:46:18] [ERROR] [AIService] - เกิดข้อผิดพลาดในการโหลดโมเดล: [Errno 2] No such file or directory: 'models\\shoplifting_yolov8.pt'
+[2026-07-15 02:46:18] [INFO] [DatabaseService] - ตรวจสอบ/สร้างตารางฐานข้อมูลสำเร็จ
+[2026-07-15 02:50:59] [INFO] [DatabaseService] - ตรวจสอบ/สร้างตารางฐานข้อมูลสำเร็จ
+[2026-07-15 02:50:59] [INFO] [AIService] - กำลังโหลดโมเดล YOLO จาก: models/shoplifting_yolov8.pt
+[2026-07-15 02:51:00] [ERROR] [AIService] - เกิดข้อผิดพลาดในการโหลดโมเดล: [Errno 2] No such file or directory: 'models\\shoplifting_yolov8.pt'
+[2026-07-15 02:51:00] [INFO] [DatabaseService] - ตรวจสอบ/สร้างตารางฐานข้อมูลสำเร็จ
+[2026-07-15 02:51:00] [INFO] [AIService] - กำลังโหลดโมเดล YOLO จาก: models/shoplifting_yolov8.pt
+[2026-07-15 02:51:00] [ERROR] [AIService] - เกิดข้อผิดพลาดในการโหลดโมเดล: [Errno 2] No such file or directory: 'models\\shoplifting_yolov8.pt'
+[2026-07-15 02:51:00] [INFO] [DatabaseService] - ตรวจสอบ/สร้างตารางฐานข้อมูลสำเร็จ
+[2026-07-15 02:51:00] [INFO] [DatabaseService] - ตรวจสอบ/สร้างตารางฐานข้อมูลสำเร็จ
+[2026-07-15 02:51:00] [INFO] [AIService] - กำลังโหลดโมเดล YOLO จาก: models/shoplifting_yolov8.pt
+[2026-07-15 02:51:01] [ERROR] [AIService] - เกิดข้อผิดพลาดในการโหลดโมเดล: [Errno 2] No such file or directory: 'models\\shoplifting_yolov8.pt'
+[2026-07-15 02:51:01] [INFO] [DatabaseService] - ตรวจสอบ/สร้างตารางฐานข้อมูลสำเร็จ
+[2026-07-15 02:51:01] [INFO] [AIService] - กำลังโหลดโมเดล YOLO จาก: models/shoplifting_yolov8.pt
+[2026-07-15 02:51:01] [ERROR] [AIService] - เกิดข้อผิดพลาดในการโหลดโมเดล: [Errno 2] No such file or directory: 'models\\shoplifting_yolov8.pt'
+[2026-07-15 02:51:01] [INFO] [DatabaseService] - ตรวจสอบ/สร้างตารางฐานข้อมูลสำเร็จ
+[2026-07-15 02:52:19] [INFO] [DatabaseService] - ตรวจสอบ/สร้างตารางฐานข้อมูลสำเร็จ
+[2026-07-15 02:52:19] [INFO] [AIService] - กำลังโหลดโมเดล YOLO จาก: models/shoplifting_yolov8.pt
+[2026-07-15 02:52:20] [ERROR] [AIService] - เกิดข้อผิดพลาดในการโหลดโมเดล: [Errno 2] No such file or directory: 'models\\shoplifting_yolov8.pt'
+[2026-07-15 02:52:20] [INFO] [DatabaseService] - ตรวจสอบ/สร้างตารางฐานข้อมูลสำเร็จ
+[2026-07-15 02:52:20] [INFO] [AIService] - กำลังโหลดโมเดล YOLO จาก: models/shoplifting_yolov8.pt
+[2026-07-15 02:52:21] [ERROR] [AIService] - เกิดข้อผิดพลาดในการโหลดโมเดล: [Errno 2] No such file or directory: 'models\\shoplifting_yolov8.pt'
+[2026-07-15 02:52:21] [INFO] [DatabaseService] - ตรวจสอบ/สร้างตารางฐานข้อมูลสำเร็จ
+[2026-07-15 02:52:21] [INFO] [DatabaseService] - ตรวจสอบ/สร้างตารางฐานข้อมูลสำเร็จ
+[2026-07-15 02:52:21] [INFO] [AIService] - กำลังโหลดโมเดล YOLO จาก: models/shoplifting_yolov8.pt
+[2026-07-15 02:52:21] [ERROR] [AIService] - เกิดข้อผิดพลาดในการโหลดโมเดล: [Errno 2] No such file or directory: 'models\\shoplifting_yolov8.pt'
+[2026-07-15 02:52:21] [INFO] [DatabaseService] - ตรวจสอบ/สร้างตารางฐานข้อมูลสำเร็จ
+[2026-07-15 02:52:21] [INFO] [AIService] - กำลังโหลดโมเดล YOLO จาก: models/shoplifting_yolov8.pt
+[2026-07-15 02:52:21] [ERROR] [AIService] - เกิดข้อผิดพลาดในการโหลดโมเดล: [Errno 2] No such file or directory: 'models\\shoplifting_yolov8.pt'
+[2026-07-15 02:52:21] [INFO] [DatabaseService] - ตรวจสอบ/สร้างตารางฐานข้อมูลสำเร็จ
+[2026-07-15 02:56:03] [INFO] [DatabaseService] - ตรวจสอบ/สร้างตารางฐานข้อมูลสำเร็จ
+[2026-07-15 02:56:03] [INFO] [AIService] - กำลังโหลดโมเดล YOLO จาก: models/shoplifting_yolov8.pt
+[2026-07-15 02:56:04] [ERROR] [AIService] - เกิดข้อผิดพลาดในการโหลดโมเดล: [Errno 2] No such file or directory: 'models\\shoplifting_yolov8.pt'
+[2026-07-15 02:56:04] [INFO] [DatabaseService] - ตรวจสอบ/สร้างตารางฐานข้อมูลสำเร็จ
+[2026-07-15 02:56:04] [INFO] [AIService] - กำลังโหลดโมเดล YOLO จาก: models/shoplifting_yolov8.pt
+[2026-07-15 02:56:05] [ERROR] [AIService] - เกิดข้อผิดพลาดในการโหลดโมเดล: [Errno 2] No such file or directory: 'models\\shoplifting_yolov8.pt'
+[2026-07-15 02:56:05] [INFO] [DatabaseService] - ตรวจสอบ/สร้างตารางฐานข้อมูลสำเร็จ
+[2026-07-15 02:56:05] [INFO] [DatabaseService] - ตรวจสอบ/สร้างตารางฐานข้อมูลสำเร็จ
+[2026-07-15 02:56:05] [INFO] [AIService] - กำลังโหลดโมเดล YOLO จาก: models/shoplifting_yolov8.pt
+[2026-07-15 02:56:05] [ERROR] [AIService] - เกิดข้อผิดพลาดในการโหลดโมเดล: [Errno 2] No such file or directory: 'models\\shoplifting_yolov8.pt'
+[2026-07-15 02:56:05] [INFO] [DatabaseService] - ตรวจสอบ/สร้างตารางฐานข้อมูลสำเร็จ
+[2026-07-15 02:56:05] [INFO] [AIService] - กำลังโหลดโมเดล YOLO จาก: models/shoplifting_yolov8.pt
+[2026-07-15 02:56:05] [ERROR] [AIService] - เกิดข้อผิดพลาดในการโหลดโมเดล: [Errno 2] No such file or directory: 'models\\shoplifting_yolov8.pt'
+[2026-07-15 02:56:05] [INFO] [DatabaseService] - ตรวจสอบ/สร้างตารางฐานข้อมูลสำเร็จ
+[2026-07-15 02:57:27] [INFO] [DatabaseService] - ตรวจสอบ/สร้างตารางฐานข้อมูลสำเร็จ
+[2026-07-15 02:57:27] [INFO] [AIService] - กำลังโหลดโมเดล YOLO จาก: models/shoplifting_yolov8.pt
+[2026-07-15 02:57:27] [ERROR] [AIService] - เกิดข้อผิดพลาดในการโหลดโมเดล: [Errno 2] No such file or directory: 'models\\shoplifting_yolov8.pt'
+[2026-07-15 02:57:27] [INFO] [DatabaseService] - ตรวจสอบ/สร้างตารางฐานข้อมูลสำเร็จ
+[2026-07-15 02:57:27] [INFO] [AIService] - กำลังโหลดโมเดล YOLO จาก: models/shoplifting_yolov8.pt
+[2026-07-15 02:57:28] [ERROR] [AIService] - เกิดข้อผิดพลาดในการโหลดโมเดล: [Errno 2] No such file or directory: 'models\\shoplifting_yolov8.pt'
+[2026-07-15 02:57:28] [INFO] [DatabaseService] - ตรวจสอบ/สร้างตารางฐานข้อมูลสำเร็จ
+[2026-07-15 02:57:28] [INFO] [DatabaseService] - ตรวจสอบ/สร้างตารางฐานข้อมูลสำเร็จ
+[2026-07-15 02:57:28] [INFO] [AIService] - กำลังโหลดโมเดล YOLO จาก: models/shoplifting_yolov8.pt
+[2026-07-15 02:57:28] [ERROR] [AIService] - เกิดข้อผิดพลาดในการโหลดโมเดล: [Errno 2] No such file or directory: 'models\\shoplifting_yolov8.pt'
+[2026-07-15 02:57:28] [INFO] [DatabaseService] - ตรวจสอบ/สร้างตารางฐานข้อมูลสำเร็จ
+[2026-07-15 02:57:28] [INFO] [AIService] - กำลังโหลดโมเดล YOLO จาก: models/shoplifting_yolov8.pt
+[2026-07-15 02:57:28] [ERROR] [AIService] - เกิดข้อผิดพลาดในการโหลดโมเดล: [Errno 2] No such file or directory: 'models\\shoplifting_yolov8.pt'
+[2026-07-15 02:57:28] [INFO] [DatabaseService] - ตรวจสอบ/สร้างตารางฐานข้อมูลสำเร็จ
+[2026-07-15 02:59:54] [INFO] [DatabaseService] - ตรวจสอบ/สร้างตารางฐานข้อมูลสำเร็จ
+[2026-07-15 02:59:54] [INFO] [AIService] - กำลังโหลดโมเดล YOLO จาก: models/shoplifting_yolov8.pt
+[2026-07-15 02:59:55] [ERROR] [AIService] - เกิดข้อผิดพลาดในการโหลดโมเดล: [Errno 2] No such file or directory: 'models\\shoplifting_yolov8.pt'
+[2026-07-15 02:59:55] [INFO] [DatabaseService] - ตรวจสอบ/สร้างตารางฐานข้อมูลสำเร็จ
+[2026-07-15 02:59:55] [INFO] [AIService] - กำลังโหลดโมเดล YOLO จาก: models/shoplifting_yolov8.pt
+[2026-07-15 02:59:56] [ERROR] [AIService] - เกิดข้อผิดพลาดในการโหลดโมเดล: [Errno 2] No such file or directory: 'models\\shoplifting_yolov8.pt'
+[2026-07-15 02:59:56] [INFO] [DatabaseService] - ตรวจสอบ/สร้างตารางฐานข้อมูลสำเร็จ
+[2026-07-15 02:59:56] [INFO] [DatabaseService] - ตรวจสอบ/สร้างตารางฐานข้อมูลสำเร็จ
+[2026-07-15 02:59:56] [INFO] [AIService] - กำลังโหลดโมเดล YOLO จาก: models/shoplifting_yolov8.pt
+[2026-07-15 02:59:56] [ERROR] [AIService] - เกิดข้อผิดพลาดในการโหลดโมเดล: [Errno 2] No such file or directory: 'models\\shoplifting_yolov8.pt'
+[2026-07-15 02:59:56] [INFO] [DatabaseService] - ตรวจสอบ/สร้างตารางฐานข้อมูลสำเร็จ
+[2026-07-15 02:59:56] [INFO] [AIService] - กำลังโหลดโมเดล YOLO จาก: models/shoplifting_yolov8.pt
+[2026-07-15 02:59:56] [ERROR] [AIService] - เกิดข้อผิดพลาดในการโหลดโมเดล: [Errno 2] No such file or directory: 'models\\shoplifting_yolov8.pt'
+[2026-07-15 02:59:56] [INFO] [DatabaseService] - ตรวจสอบ/สร้างตารางฐานข้อมูลสำเร็จ
+[2026-07-15 03:00:36] [INFO] [DatabaseService] - ตรวจสอบ/สร้างตารางฐานข้อมูลสำเร็จ
+[2026-07-15 03:00:36] [INFO] [AIService] - กำลังโหลดโมเดล YOLO จาก: models/shoplifting_yolov8.pt
+[2026-07-15 03:00:36] [ERROR] [AIService] - เกิดข้อผิดพลาดในการโหลดโมเดล: [Errno 2] No such file or directory: 'models\\shoplifting_yolov8.pt'
+[2026-07-15 03:00:36] [INFO] [DatabaseService] - ตรวจสอบ/สร้างตารางฐานข้อมูลสำเร็จ
+[2026-07-15 03:00:36] [INFO] [AIService] - กำลังโหลดโมเดล YOLO จาก: models/shoplifting_yolov8.pt
+[2026-07-15 03:00:36] [ERROR] [AIService] - เกิดข้อผิดพลาดในการโหลดโมเดล: [Errno 2] No such file or directory: 'models\\shoplifting_yolov8.pt'
+[2026-07-15 03:00:36] [INFO] [DatabaseService] - ตรวจสอบ/สร้างตารางฐานข้อมูลสำเร็จ
+[2026-07-15 03:00:36] [INFO] [AIService] - กำลังโหลดโมเดล YOLO จาก: models/shoplifting_yolov8.pt
+[2026-07-15 03:00:37] [ERROR] [AIService] - เกิดข้อผิดพลาดในการโหลดโมเดล: [Errno 2] No such file or directory: 'models\\shoplifting_yolov8.pt'
+[2026-07-15 03:03:33] [INFO] [DatabaseService] - ตรวจสอบ/สร้างตารางฐานข้อมูลสำเร็จ
+[2026-07-15 03:03:33] [INFO] [AIService] - กำลังโหลดโมเดล YOLO จาก: models/shoplifting_yolov8.pt
+[2026-07-15 03:03:34] [ERROR] [AIService] - เกิดข้อผิดพลาดในการโหลดโมเดล: [Errno 2] No such file or directory: 'models\\shoplifting_yolov8.pt'
+[2026-07-15 03:03:34] [INFO] [DatabaseService] - ตรวจสอบ/สร้างตารางฐานข้อมูลสำเร็จ
+[2026-07-15 03:03:34] [INFO] [AIService] - กำลังโหลดโมเดล YOLO จาก: models/shoplifting_yolov8.pt
+[2026-07-15 03:03:34] [ERROR] [AIService] - เกิดข้อผิดพลาดในการโหลดโมเดล: [Errno 2] No such file or directory: 'models\\shoplifting_yolov8.pt'
+[2026-07-15 03:03:34] [INFO] [DatabaseService] - ตรวจสอบ/สร้างตารางฐานข้อมูลสำเร็จ
+[2026-07-15 03:03:34] [INFO] [DatabaseService] - ตรวจสอบ/สร้างตารางฐานข้อมูลสำเร็จ
+[2026-07-15 03:03:34] [INFO] [AIService] - กำลังโหลดโมเดล YOLO จาก: models/shoplifting_yolov8.pt
+[2026-07-15 03:03:35] [ERROR] [AIService] - เกิดข้อผิดพลาดในการโหลดโมเดล: [Errno 2] No such file or directory: 'models\\shoplifting_yolov8.pt'
+[2026-07-15 03:03:35] [INFO] [DatabaseService] - ตรวจสอบ/สร้างตารางฐานข้อมูลสำเร็จ
+[2026-07-15 03:03:35] [INFO] [AIService] - กำลังโหลดโมเดล YOLO จาก: models/shoplifting_yolov8.pt
+[2026-07-15 03:03:36] [ERROR] [AIService] - เกิดข้อผิดพลาดในการโหลดโมเดล: [Errno 2] No such file or directory: 'models\\shoplifting_yolov8.pt'
+[2026-07-15 03:03:36] [INFO] [DatabaseService] - ตรวจสอบ/สร้างตารางฐานข้อมูลสำเร็จ
+[2026-07-15 03:26:15] [INFO] [DatabaseService] - ตรวจสอบ/สร้างตารางฐานข้อมูลสำเร็จ
+[2026-07-15 03:26:15] [INFO] [AIService] - กำลังโหลดโมเดล YOLO จาก: models/shoplifting_yolov8.pt
+[2026-07-15 03:26:15] [ERROR] [AIService] - เกิดข้อผิดพลาดในการโหลดโมเดล: [Errno 2] No such file or directory: 'models\\shoplifting_yolov8.pt'
+[2026-07-15 03:26:15] [INFO] [DatabaseService] - ตรวจสอบ/สร้างตารางฐานข้อมูลสำเร็จ
+[2026-07-15 03:26:15] [INFO] [AIService] - กำลังโหลดโมเดล YOLO จาก: models/shoplifting_yolov8.pt
+[2026-07-15 03:26:16] [ERROR] [AIService] - เกิดข้อผิดพลาดในการโหลดโมเดล: [Errno 2] No such file or directory: 'models\\shoplifting_yolov8.pt'
+[2026-07-15 03:26:16] [INFO] [DatabaseService] - ตรวจสอบ/สร้างตารางฐานข้อมูลสำเร็จ
+[2026-07-15 03:26:16] [INFO] [DatabaseService] - ตรวจสอบ/สร้างตารางฐานข้อมูลสำเร็จ
+[2026-07-15 03:26:16] [INFO] [AIService] - กำลังโหลดโมเดล YOLO จาก: models/shoplifting_yolov8.pt
+[2026-07-15 03:26:16] [ERROR] [AIService] - เกิดข้อผิดพลาดในการโหลดโมเดล: [Errno 2] No such file or directory: 'models\\shoplifting_yolov8.pt'
+[2026-07-15 03:26:16] [INFO] [DatabaseService] - ตรวจสอบ/สร้างตารางฐานข้อมูลสำเร็จ
+[2026-07-15 03:26:16] [INFO] [AIService] - กำลังโหลดโมเดล YOLO จาก: models/shoplifting_yolov8.pt
+[2026-07-15 03:26:17] [ERROR] [AIService] - เกิดข้อผิดพลาดในการโหลดโมเดล: [Errno 2] No such file or directory: 'models\\shoplifting_yolov8.pt'
+[2026-07-15 03:26:17] [INFO] [DatabaseService] - ตรวจสอบ/สร้างตารางฐานข้อมูลสำเร็จ
+[2026-07-15 03:28:28] [INFO] [DatabaseService] - ตรวจสอบ/สร้างตารางฐานข้อมูลสำเร็จ
+[2026-07-15 03:28:28] [INFO] [AIService] - กำลังโหลดโมเดล YOLO จาก: models/shoplifting_yolov8.pt
+[2026-07-15 03:28:29] [ERROR] [AIService] - เกิดข้อผิดพลาดในการโหลดโมเดล: [Errno 2] No such file or directory: 'models\\shoplifting_yolov8.pt'
+[2026-07-15 03:28:29] [INFO] [DatabaseService] - ตรวจสอบ/สร้างตารางฐานข้อมูลสำเร็จ
+[2026-07-15 03:28:29] [INFO] [AIService] - กำลังโหลดโมเดล YOLO จาก: models/shoplifting_yolov8.pt
+[2026-07-15 03:28:38] [ERROR] [AIService] - เกิดข้อผิดพลาดในการโหลดโมเดล: [Errno 2] No such file or directory: 'models\\shoplifting_yolov8.pt'
+[2026-07-15 03:28:38] [INFO] [DatabaseService] - ตรวจสอบ/สร้างตารางฐานข้อมูลสำเร็จ
+[2026-07-15 03:28:38] [INFO] [DatabaseService] - ตรวจสอบ/สร้างตารางฐานข้อมูลสำเร็จ
+[2026-07-15 03:28:38] [INFO] [AIService] - กำลังโหลดโมเดล YOLO จาก: models/shoplifting_yolov8.pt
+[2026-07-15 03:28:38] [ERROR] [AIService] - เกิดข้อผิดพลาดในการโหลดโมเดล: [Errno 2] No such file or directory: 'models\\shoplifting_yolov8.pt'
+[2026-07-15 03:28:38] [INFO] [DatabaseService] - ตรวจสอบ/สร้างตารางฐานข้อมูลสำเร็จ
+[2026-07-15 03:28:38] [INFO] [AIService] - กำลังโหลดโมเดล YOLO จาก: models/shoplifting_yolov8.pt
+[2026-07-15 03:28:39] [ERROR] [AIService] - เกิดข้อผิดพลาดในการโหลดโมเดล: [Errno 2] No such file or directory: 'models\\shoplifting_yolov8.pt'
+[2026-07-15 03:28:39] [INFO] [DatabaseService] - ตรวจสอบ/สร้างตารางฐานข้อมูลสำเร็จ
+[2026-07-15 03:51:41] [INFO] [DatabaseService] - ตรวจสอบ/สร้างตารางฐานข้อมูลสำเร็จ
+[2026-07-15 03:51:41] [INFO] [AIService] - กำลังโหลดโมเดล YOLO จาก: models/shoplifting_yolov8.pt
+[2026-07-15 03:51:41] [ERROR] [AIService] - เกิดข้อผิดพลาดในการโหลดโมเดล: [Errno 2] No such file or directory: 'models\\shoplifting_yolov8.pt'
+[2026-07-15 03:51:41] [INFO] [DatabaseService] - ตรวจสอบ/สร้างตารางฐานข้อมูลสำเร็จ
+[2026-07-15 03:51:41] [INFO] [AIService] - กำลังโหลดโมเดล YOLO จาก: models/shoplifting_yolov8.pt
+[2026-07-15 03:51:42] [ERROR] [AIService] - เกิดข้อผิดพลาดในการโหลดโมเดล: [Errno 2] No such file or directory: 'models\\shoplifting_yolov8.pt'
+[2026-07-15 03:51:42] [INFO] [DatabaseService] - ตรวจสอบ/สร้างตารางฐานข้อมูลสำเร็จ
+[2026-07-15 03:52:00] [INFO] [DatabaseService] - ตรวจสอบ/สร้างตารางฐานข้อมูลสำเร็จ
+[2026-07-15 03:52:00] [INFO] [AIService] - กำลังโหลดโมเดล YOLO จาก: models/shoplifting_yolov8.pt
+[2026-07-15 03:52:01] [ERROR] [AIService] - เกิดข้อผิดพลาดในการโหลดโมเดล: [Errno 2] No such file or directory: 'models\\shoplifting_yolov8.pt'
+[2026-07-15 03:52:01] [INFO] [DatabaseService] - ตรวจสอบ/สร้างตารางฐานข้อมูลสำเร็จ
+[2026-07-15 03:52:01] [INFO] [AIService] - กำลังโหลดโมเดล YOLO จาก: models/shoplifting_yolov8.pt
+[2026-07-15 03:52:01] [ERROR] [AIService] - เกิดข้อผิดพลาดในการโหลดโมเดล: [Errno 2] No such file or directory: 'models\\shoplifting_yolov8.pt'
+[2026-07-15 03:52:01] [INFO] [DatabaseService] - ตรวจสอบ/สร้างตารางฐานข้อมูลสำเร็จ
+[2026-07-15 03:56:36] [INFO] [DatabaseService] - ตรวจสอบ/สร้างตารางฐานข้อมูลสำเร็จ
+[2026-07-15 03:56:36] [INFO] [DatabaseService] - ตรวจสอบ/สร้างตารางฐานข้อมูลสำเร็จ
+[2026-07-15 03:56:36] [INFO] [DatabaseService] - ตรวจสอบ/สร้างตารางฐานข้อมูลสำเร็จ
+[2026-07-15 03:57:05] [INFO] [DatabaseService] - ตรวจสอบ/สร้างตารางฐานข้อมูลสำเร็จ
+[2026-07-15 03:57:05] [INFO] [DatabaseService] - ตรวจสอบ/สร้างตารางฐานข้อมูลสำเร็จ
+[2026-07-15 03:57:05] [INFO] [DatabaseService] - ตรวจสอบ/สร้างตารางฐานข้อมูลสำเร็จ
+[2026-07-15 04:01:28] [INFO] [DatabaseService] - ตรวจสอบ/สร้างตารางฐานข้อมูลสำเร็จ
+[2026-07-15 04:01:28] [INFO] [DatabaseService] - ตรวจสอบ/สร้างตารางฐานข้อมูลสำเร็จ
+[2026-07-15 04:01:28] [INFO] [DatabaseService] - ตรวจสอบ/สร้างตารางฐานข้อมูลสำเร็จ
+[2026-07-15 04:04:34] [INFO] [DatabaseService] - ตรวจสอบ/สร้างตารางฐานข้อมูลสำเร็จ
+[2026-07-15 04:04:34] [INFO] [DatabaseService] - ตรวจสอบ/สร้างตารางฐานข้อมูลสำเร็จ
+[2026-07-15 04:04:34] [INFO] [DatabaseService] - ตรวจสอบ/สร้างตารางฐานข้อมูลสำเร็จ
+[2026-07-15 04:07:25] [INFO] [DatabaseService] - ตรวจสอบ/สร้างตารางฐานข้อมูลสำเร็จ
+[2026-07-15 04:09:47] [INFO] [DatabaseService] - ตรวจสอบ/สร้างตารางฐานข้อมูลสำเร็จ
+[2026-07-15 04:10:16] [INFO] [DatabaseService] - ตรวจสอบ/สร้างตารางฐานข้อมูลสำเร็จ
+[2026-07-15 04:10:16] [INFO] [DatabaseService] - ตรวจสอบ/สร้างตารางฐานข้อมูลสำเร็จ
+[2026-07-15 04:19:36] [INFO] [DatabaseService] - ตรวจสอบ/สร้างตารางฐานข้อมูลสำเร็จ
+[2026-07-15 04:19:37] [INFO] [DatabaseService] - ตรวจสอบ/สร้างตารางฐานข้อมูลสำเร็จ
+[2026-07-15 04:27:56] [INFO] [DatabaseService] - ตรวจสอบ/สร้างตารางฐานข้อมูลสำเร็จ
+[2026-07-15 04:27:56] [INFO] [DatabaseService] - ตรวจสอบ/สร้างตารางฐานข้อมูลสำเร็จ
+[2026-07-15 04:31:27] [INFO] [DatabaseService] - ตรวจสอบ/สร้างตารางฐานข้อมูลสำเร็จ
+[2026-07-15 04:31:28] [INFO] [DatabaseService] - ตรวจสอบ/สร้างตารางฐานข้อมูลสำเร็จ
+[2026-07-15 04:36:31] [INFO] [DatabaseService] - ตรวจสอบ/สร้างตารางฐานข้อมูลสำเร็จ
+[2026-07-15 04:36:31] [INFO] [DatabaseService] - ตรวจสอบ/สร้างตารางฐานข้อมูลสำเร็จ
+[2026-07-15 04:39:00] [INFO] [DatabaseService] - ตรวจสอบ/สร้างตารางฐานข้อมูลสำเร็จ
+[2026-07-15 04:39:00] [INFO] [DatabaseService] - ตรวจสอบ/สร้างตารางฐานข้อมูลสำเร็จ
+[2026-07-15 04:40:58] [INFO] [DatabaseService] - ตรวจสอบ/สร้างตารางฐานข้อมูลสำเร็จ
+[2026-07-15 04:40:58] [INFO] [DatabaseService] - ตรวจสอบ/สร้างตารางฐานข้อมูลสำเร็จ
+[2026-07-15 04:43:30] [INFO] [DatabaseService] - ตรวจสอบ/สร้างตารางฐานข้อมูลสำเร็จ
+[2026-07-15 04:43:30] [INFO] [DatabaseService] - ตรวจสอบ/สร้างตารางฐานข้อมูลสำเร็จ
+[2026-07-15 04:48:58] [INFO] [DatabaseService] - ตรวจสอบ/สร้างตารางฐานข้อมูลสำเร็จ
+[2026-07-15 04:49:09] [INFO] [DatabaseService] - ตรวจสอบ/สร้างตารางฐานข้อมูลสำเร็จ
+[2026-07-15 04:53:54] [INFO] [DatabaseService] - ตรวจสอบ/สร้างตารางฐานข้อมูลสำเร็จ
+[2026-07-15 04:53:54] [INFO] [DatabaseService] - ตรวจสอบ/สร้างตารางฐานข้อมูลสำเร็จ
+[2026-07-15 04:59:13] [INFO] [DatabaseService] - ตรวจสอบ/สร้างตารางฐานข้อมูลสำเร็จ
+[2026-07-15 04:59:14] [INFO] [DatabaseService] - ตรวจสอบ/สร้างตารางฐานข้อมูลสำเร็จ
+[2026-07-15 05:04:55] [INFO] [DatabaseService] - ตรวจสอบ/สร้างตารางฐานข้อมูลสำเร็จ
+[2026-07-15 05:04:55] [INFO] [DatabaseService] - ตรวจสอบ/สร้างตารางฐานข้อมูลสำเร็จ
+[2026-07-15 05:06:49] [INFO] [DatabaseService] - ตรวจสอบ/สร้างตารางฐานข้อมูลสำเร็จ
+[2026-07-15 05:06:50] [INFO] [DatabaseService] - ตรวจสอบ/สร้างตารางฐานข้อมูลสำเร็จ
+[2026-07-15 05:10:05] [INFO] [DatabaseService] - ตรวจสอบ/สร้างตารางฐานข้อมูลสำเร็จ
+[2026-07-15 05:10:06] [INFO] [DatabaseService] - ตรวจสอบ/สร้างตารางฐานข้อมูลสำเร็จ
+[2026-07-15 05:12:39] [INFO] [DatabaseService] - ตรวจสอบ/สร้างตารางฐานข้อมูลสำเร็จ
+[2026-07-15 05:12:39] [INFO] [DatabaseService] - ตรวจสอบ/สร้างตารางฐานข้อมูลสำเร็จ
