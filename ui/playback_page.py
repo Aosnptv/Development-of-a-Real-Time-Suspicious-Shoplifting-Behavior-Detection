@@ -1,84 +1,74 @@
-# ui/playback_page.py
-from PySide6.QtWidgets import (QWidget, QVBoxLayout, QHBoxLayout, QLabel, 
-                               QFrame, QTableWidget, QTableWidgetItem, 
-                               QPushButton, QDateEdit, QHeaderView)
-from PySide6.QtCore import Qt, QDate
-from PySide6.QtGui import QFont
+from PySide6.QtWidgets import QWidget, QVBoxLayout, QHBoxLayout, QLabel, QTableWidget, QTableWidgetItem, QHeaderView, QFrame
+from PySide6.QtCore import Qt
 
 class PlaybackPage(QWidget):
     def __init__(self):
         super().__init__()
-        self.setAttribute(Qt.WidgetAttribute.WA_StyledBackground, True)
-        self.setStyleSheet("background-color: #f8fafc;")
+        main_layout = QVBoxLayout(self)
+        main_layout.setContentsMargins(20, 20, 20, 20)
         
-        layout = QVBoxLayout(self)
-        layout.setContentsMargins(24, 24, 24, 24)
-        layout.setSpacing(20)
+        self.title = QLabel("⏪ Playback & Event History")
+        self.title.setStyleSheet("font-size: 20px; font-weight: bold;")
+        main_layout.addWidget(self.title)
         
-        # ─────────────── HEADER & FILTER AREA ───────────────
-        filter_frame = QFrame()
-        filter_frame.setStyleSheet("background-color: #ffffff; border: 1px solid #e2e8f0; border-radius: 8px;")
-        filter_layout = QHBoxLayout(filter_frame)
-        filter_layout.setContentsMargins(16, 16, 16, 16)
-        
-        title_lbl = QLabel("⏪ PLAYBACK HISTORY")
-        title_lbl.setFont(QFont("Segoe UI", 14, QFont.Weight.Bold))
-        title_lbl.setStyleSheet("color: #0f172a;")
-        filter_layout.addWidget(title_lbl)
-        
-        filter_layout.addStretch()
-        
-        date_lbl = QLabel("Select Date:")
-        date_lbl.setStyleSheet("color: #475569;")
-        filter_layout.addWidget(date_lbl)
-        
-        self.date_picker = QDateEdit(QDate.currentDate())
-        self.date_picker.setCalendarPopup(True)
-        self.date_picker.setStyleSheet("padding: 6px; border: 1px solid #cbd5e1; border-radius: 6px; color: #0f172a;")
-        filter_layout.addWidget(self.date_picker)
-        
-        self.btn_search = QPushButton("🔍 Search Logs")
-        self.btn_search.setStyleSheet("background-color: #2563eb; color: white; padding: 6px 16px; border-radius: 6px; font-weight: bold;")
-        filter_layout.addWidget(self.btn_search)
-        
-        layout.addWidget(filter_frame)
-        
-        # ─────────────── MAIN CONTENT VIEW ───────────────
+        # ─────────────── แบ่งหน้าจอ ซ้าย-ขวา ───────────────
         content_layout = QHBoxLayout()
-        content_layout.setSpacing(16)
+        content_layout.setSpacing(20)
         
-        # ฝั่งซ้าย: ตารางรายการตรวจจับ
-        self.table = QTableWidget(0, 4)
-        self.table.setHorizontalHeaderLabels(["Time", "Event Type", "Confidence", "Video File"])
-        self.table.horizontalHeader().setSectionResizeMode(QHeaderView.ResizeMode.Stretch)
-        self.table.setStyleSheet("""
-            QTableWidget { background-color: white; border: 1px solid #e2e8f0; border-radius: 8px; color: #0f172a; }
-            QHeaderView::section { background-color: #f1f5f9; color: #475569; font-weight: bold; border: none; padding: 8px; }
-        """)
+        # ฝั่งซ้าย: ตารางเหตุการณ์
+        self.table = QTableWidget(5, 4)
+        self.table.setHorizontalHeaderLabels(["Timestamp", "Camera", "Event Type", "Status"])
+        self.table.horizontalHeader().setSectionResizeMode(QHeaderView.Stretch)
         
-        # ข้อมูลจำลองระบบ
-        self._insert_mock_data("10:23:15", "Shoplifting Alert", "94.5%", "cam01_20260713_1023.mp4")
-        self._insert_mock_data("11:45:02", "Suspicious Behavior", "88.2%", "cam02_20260713_1145.mp4")
+        mock_data = [
+            ("2026-07-14 23:15:02", "Camera 0", "Suspicious Behavior", "Alert Sent"),
+            ("2026-07-14 22:40:11", "Camera 1", "Normal", "Logged"),
+            ("2026-07-14 21:05:54", "Camera 0", "Shoplifting Detected", "Telegram Notified"),
+            ("2026-07-14 19:30:22", "Camera 1", "Suspicious Behavior", "Reviewed"),
+            ("2026-07-14 18:12:00", "Camera 0", "Normal", "Logged")
+        ]
         
+        for row, data in enumerate(mock_data):
+            for col, text in enumerate(data):
+                item = QTableWidgetItem(text)
+                item.setTextAlignment(Qt.AlignCenter)
+                self.table.setItem(row, col, item)
+                
         content_layout.addWidget(self.table, stretch=2)
         
-        # ฝั่งขวา: จอจำลองสำหรับเล่นวิดีโอย้อนหลัง
-        player_frame = QFrame()
-        player_frame.setStyleSheet("background-color: #0f172a; border-radius: 8px; min-width: 320px;")
-        player_layout = QVBoxLayout(player_frame)
+        # 🟢 ฝั่งขวา: เพิ่มช่องสำหรับดูภาพล่าสุดที่แคป (Snapshot Panel) ตามคำขอ
+        self.snapshot_panel = QFrame()
+        snapshot_lay = QVBoxLayout(self.snapshot_panel)
+        snapshot_lay.setContentsMargins(15, 15, 15, 15)
         
-        self.video_lbl = QLabel("🎬 Select a log row\nto play back video clip")
-        self.video_lbl.setAlignment(Qt.AlignmentFlag.AlignCenter)
-        self.video_lbl.setStyleSheet("color: #94a3b8; font-weight: bold;")
-        player_layout.addWidget(self.video_lbl)
+        self.lbl_snap_title = QLabel("📸 Latest Event Snapshot")
+        snapshot_lay.addWidget(self.lbl_snap_title)
         
-        content_layout.addWidget(player_frame, stretch=1)
-        layout.addLayout(content_layout, stretch=1)
+        self.lbl_snapshot = QLabel("No Event Selected\n\n(Select a row from history to view)")
+        self.lbl_snapshot.setAlignment(Qt.AlignCenter)
+        self.lbl_snapshot.setMinimumSize(320, 240)
+        snapshot_lay.addWidget(self.lbl_snapshot, stretch=1)
+        
+        content_layout.addWidget(self.snapshot_panel, stretch=1)
+        main_layout.addLayout(content_layout)
 
-    def _insert_mock_data(self, time, event, conf, file):
-        row = self.table.rowCount()
-        self.table.insertRow(row)
-        self.table.setItem(row, 0, QTableWidgetItem(time))
-        self.table.setItem(row, 1, QTableWidgetItem(event))
-        self.table.setItem(row, 2, QTableWidgetItem(conf))
-        self.table.setItem(row, 3, QTableWidgetItem(file))
+    def set_theme(self, is_dark_mode):
+        # เปลี่ยนสีตัวอักษรและพื้นหลังของทุก Widget ตามธีม
+        self.title.setStyleSheet(f"color: {'white' if is_dark_mode else 'black'}; font-size: 20px; font-weight: bold;")
+        
+        bg = "#1e293b" if is_dark_mode else "#ffffff"
+        fg = "white" if is_dark_mode else "black"
+        grid = "#334155" if is_dark_mode else "#cbd5e1"
+        bg_lbl = "#0f172a" if is_dark_mode else "#e2e8f0"
+        
+        # สไตล์ตาราง
+        self.table.setStyleSheet(f"""
+            QTableWidget {{ background-color: {bg}; color: {fg}; gridline-color: {grid}; border: 1px solid {grid}; }}
+            QHeaderView::section {{ background-color: {'#0f172a' if is_dark_mode else '#e2e8f0'}; color: {fg}; padding: 6px; border: 1px solid {grid}; font-weight: bold; }}
+            QTableWidget::item {{ color: {fg}; }}
+        """)
+        
+        # สไตล์กล่อง Snapshot ด้านขวา
+        self.snapshot_panel.setStyleSheet(f"background-color: {bg}; border: 1px solid {grid}; border-radius: 8px;")
+        self.lbl_snap_title.setStyleSheet(f"color: {'#38bdf8' if is_dark_mode else '#2563eb'}; font-weight: bold; font-size: 14px; border: none; background: transparent;")
+        self.lbl_snapshot.setStyleSheet(f"background-color: {bg_lbl}; color: {'#94a3b8' if is_dark_mode else '#475569'}; border: 1px dashed {grid}; border-radius: 6px; font-weight: bold; font-size: 12px;")
