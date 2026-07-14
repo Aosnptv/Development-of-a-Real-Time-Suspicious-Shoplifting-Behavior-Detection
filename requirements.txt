@@ -18,3 +18,7 @@ nvidia_ml_py==13.610.43         # ตัวเชื่อมโยงคำส�
 # --- [ 4. ระบบจัดการข้อมูลและสถิติย้อนหลัง ] ---
 pandas==3.0.3                   # ใช้จัดการตารางข้อมูล บันทึกและดึงประวัติการแจ้งเตือน (ในหน้า Playback)
 pyqtgraph==0.14.0               # ใช้สำหรับวาดกราฟสถิติความถี่การแจ้งเตือนแบบ Real-time บน Dashboard (ถ้ามี)
+
+pip uninstall pynvml -y
+pip install nvidia-ml-py
+pip install requests
