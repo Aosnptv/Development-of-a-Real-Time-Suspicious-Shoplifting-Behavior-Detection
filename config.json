@@ -1,0 +1,25 @@
+{
+    "app_name": "Shoplifting Detection System",
+    "camera": {
+        "num_cameras": 2,
+        "cam_1": 0,
+        "cam_2": 1
+    },
+    "ai": {
+        "model_path": "models/shoplifting_yolov8.pt",
+        "confidence_threshold": 0.65
+    },
+    "telegram": {
+        "enabled": false,
+        "bot_token": "YOUR_BOT_TOKEN_HEREs",
+        "chat_id": "YOUR_CHAT_ID_HERE"
+    },
+    "logging": {
+        "level": "INFO",
+        "max_bytes": 5242880,
+        "backup_count": 3
+    },
+    "database": {
+        "path": "data/alerts_history.db"
+    }
+}
