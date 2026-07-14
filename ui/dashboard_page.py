@@ -1,157 +1,289 @@
-from PySide6.QtWidgets import QWidget, QVBoxLayout, QHBoxLayout, QLabel, QComboBox, QFrame
-from PySide6.QtCore import Qt
-from PySide6.QtGui import QImage, QPixmap
+from PySide6.QtWidgets import (QWidget, QVBoxLayout, QHBoxLayout, QLabel, 
+                               QFrame, QSizePolicy)
+from PySide6.QtCore import Qt, QTimer
+from PySide6.QtGui import QPixmap, QImage
+import os
+import pandas as pd
+from datetime import datetime
+from services.database_service import DatabaseService
 
 class DashboardPage(QWidget):
-    def __init__(self, camera_worker):
-        super().__init__()
+    def __init__(self, camera_worker=None, parent=None):
+        super().__init__(parent)
         self.camera_worker = camera_worker
-        self.total_alerts = 0
+        self.db = DatabaseService()
         self.is_dark_theme = True
-        
-        # 🟢 เพิ่มตัวจำสถานะเพื่อล็อกไม่ให้สั่งเขียน Stylesheet ซ้ำซากจน CPU ทะลุ 100%
-        self.cam1_status = None 
-        self.cam2_status = None
-        
-        layout = QVBoxLayout(self)
-        layout.setContentsMargins(20, 20, 20, 20)
-        layout.setSpacing(20)
-        
-        # การ์ดสถิติ
+        self.cam_statuses = {0: None, 1: None} # ตัวจำสถานะเพื่อลดภาระ CPU
+
+        self.setup_ui()
+        self.refresh_dashboard_data()
+
+        # ตั้งนาฬิกาให้รีเฟรชสถิติและรูปภาพล่าสุด ทุกๆ 3 วินาที
+        self.stats_timer = QTimer(self)
+        self.stats_timer.timeout.connect(self.refresh_dashboard_data)
+        self.stats_timer.start(3000)
+
+    def setup_ui(self):
+        main_layout = QVBoxLayout(self)
+        main_layout.setContentsMargins(20, 20, 20, 20)
+        main_layout.setSpacing(20)
+
+        # ==========================================
+        # 1. แถวบน: การ์ดแสดงสถิติ
+        # ==========================================
         stats_layout = QHBoxLayout()
-        stats_layout.setSpacing(15)
-        self.card1, self.lbl_t1, self.lbl_v1 = self._create_stat_card("Total Detections", "1,240", "#3b82f6")
-        self.card2, self.lbl_t2, self.lbl_v2 = self._create_stat_card("Suspicious Behavior", "42", "#f59e0b")
-        self.card3, self.lbl_t3, self.lbl_v3 = self._create_stat_card("Shoplifting Alerts", "12", "#ef4444")
-        stats_layout.addWidget(self.card1)
-        stats_layout.addWidget(self.card2)
-        stats_layout.addWidget(self.card3)
-        layout.addLayout(stats_layout)
         
-        # จอกล้อง
-        video_layout = QHBoxLayout()
-        video_layout.setSpacing(15)
-        cam_items = [f"Camera {i}" for i in range(4)]
-        
-        # จอซ้าย
-        cam1_frame = QVBoxLayout()
-        self.combo_cam1 = QComboBox()
-        self.combo_cam1.addItems(cam_items)
-        self.lbl_video1 = QLabel("No Signal (Cam 1)")
-        self.lbl_video1.setAlignment(Qt.AlignCenter)
-        self.lbl_video1.setMinimumSize(400, 300)
-        self.lbl_video1.setScaledContents(True) # 🟢 ให้การ์ดจอช่วยสเกลภาพแทน CPU
-        cam1_frame.addWidget(self.combo_cam1)
-        cam1_frame.addWidget(self.lbl_video1)
-        video_layout.addLayout(cam1_frame)
-        
-        # จอขวา
-        cam2_frame = QVBoxLayout()
-        self.combo_cam2 = QComboBox()
-        self.combo_cam2.addItems(cam_items)
-        self.combo_cam2.setCurrentIndex(1)
-        self.lbl_video2 = QLabel("No Signal (Cam 2)")
-        self.lbl_video2.setAlignment(Qt.AlignCenter)
-        self.lbl_video2.setMinimumSize(400, 300)
-        self.lbl_video2.setScaledContents(True) # 🟢 ให้การ์ดจอช่วยสเกลภาพแทน CPU
-        cam2_frame.addWidget(self.combo_cam2)
-        cam2_frame.addWidget(self.lbl_video2)
-        video_layout.addLayout(cam2_frame)
-        
-        layout.addLayout(video_layout, stretch=1)
+        self.card_today = QFrame()
+        self.card_today.setFrameShape(QFrame.StyledPanel)
+        today_layout = QVBoxLayout(self.card_today)
+        self.lbl_today_title = QLabel("🚨 แจ้งเตือนวันนี้")
+        self.lbl_today_title.setAlignment(Qt.AlignCenter)
+        self.lbl_today_count = QLabel("0")
+        self.lbl_today_count.setAlignment(Qt.AlignCenter)
+        self.lbl_today_count.setStyleSheet("font-size: 36px; font-weight: bold; color: #ef4444;")
+        today_layout.addWidget(self.lbl_today_title)
+        today_layout.addWidget(self.lbl_today_count)
 
-        if self.camera_worker:
-            self.camera_worker.frame_ready.connect(self.update_frame)
-        self.combo_cam1.currentIndexChanged.connect(self.update_active_cameras)
-        self.combo_cam2.currentIndexChanged.connect(self.update_active_cameras)
-        self.update_active_cameras()
+        self.card_total = QFrame()
+        self.card_total.setFrameShape(QFrame.StyledPanel)
+        total_layout = QVBoxLayout(self.card_total)
+        self.lbl_total_title = QLabel("📁 แจ้งเตือนทั้งหมด")
+        self.lbl_total_title.setAlignment(Qt.AlignCenter)
+        self.lbl_total_count = QLabel("0")
+        self.lbl_total_count.setAlignment(Qt.AlignCenter)
+        self.lbl_total_count.setStyleSheet("font-size: 36px; font-weight: bold; color: #3b82f6;")
+        total_layout.addWidget(self.lbl_total_title)
+        total_layout.addWidget(self.lbl_total_count)
 
-    def _create_stat_card(self, title, value, color):
-        card = QFrame()
-        card.setFixedHeight(90)
-        lay = QVBoxLayout(card)
-        lbl_title = QLabel(title)
-        lbl_val = QLabel(value)
-        lay.addWidget(lbl_title)
-        lay.addWidget(lbl_val)
-        return card, lbl_title, lbl_val
+        stats_layout.addWidget(self.card_today)
+        stats_layout.addWidget(self.card_total)
+        main_layout.addLayout(stats_layout, stretch=1)
 
-    def set_theme(self, is_dark_mode):
-        self.is_dark_theme = is_dark_mode
-        card_bg = "#1e293b" if is_dark_mode else "#ffffff"
-        title_color = "#94a3b8" if is_dark_mode else "#64748b"
-        val_colors = ["#3b82f6", "#f59e0b", "#ef4444"]
-        border_color = "#334155" if is_dark_mode else "#cbd5e1"
+        # ==========================================
+        # 2. แถวล่าง: กล้องสด (ซ้าย) + ภาพหลักฐาน 3 รายการล่าสุด (ขวา)
+        # ==========================================
+        content_layout = QHBoxLayout()
+
+        # --- ฝั่งซ้าย: กล้องสด ---
+        cam_layout = QVBoxLayout()
+        self.lbl_cam_title = QLabel("📹 กล้องวงจรปิดสด")
+        self.lbl_cam_title.setStyleSheet("font-size: 18px; font-weight: bold;")
+        cam_layout.addWidget(self.lbl_cam_title)
         
-        for i, (card, lbl_t, lbl_v) in enumerate([(self.card1, self.lbl_t1, self.lbl_v1), 
-                                                   (self.card2, self.lbl_t2, self.lbl_v2), 
-                                                   (self.card3, self.lbl_t3, self.lbl_v3)]):
-            card.setStyleSheet(f"background-color: {card_bg}; border-radius: 8px; border-left: 5px solid {val_colors[i]}; border-top: 1px solid {border_color}; border-right: 1px solid {border_color}; border-bottom: 1px solid {border_color};")
-            lbl_t.setStyleSheet(f"color: {title_color}; font-size: 12px; font-weight: bold; background: transparent;")
-            lbl_v.setStyleSheet(f"color: {val_colors[i]}; font-size: 24px; font-weight: bold; background: transparent;")
+        self.lbl_cam1 = QLabel("รอสัญญาณกล้อง 1...")
+        self.lbl_cam1.setAlignment(Qt.AlignCenter)
+        self.lbl_cam1.setSizePolicy(QSizePolicy.Expanding, QSizePolicy.Expanding)
+        self.lbl_cam1.setStyleSheet("background-color: black; color: white; border-radius: 6px;")
+        
+        self.lbl_cam2 = QLabel("รอสัญญาณกล้อง 2...")
+        self.lbl_cam2.setAlignment(Qt.AlignCenter)
+        self.lbl_cam2.setSizePolicy(QSizePolicy.Expanding, QSizePolicy.Expanding)
+        self.lbl_cam2.setStyleSheet("background-color: black; color: white; border-radius: 6px;")
+
+        cam_layout.addWidget(self.lbl_cam1, stretch=1)
+        cam_layout.addWidget(self.lbl_cam2, stretch=1)
+        content_layout.addLayout(cam_layout, stretch=7) # ให้ฝั่งกล้องกินพื้นที่ส่วนใหญ่
+
+        # --- ฝั่งขวา: ภาพหลักฐาน 3 รายการล่าสุด (แนวตั้ง) ---
+        right_panel = QWidget()
+        right_panel.setFixedWidth(340) # ล็อกความกว้างรวมให้ชิดขวา
+        latest_layout = QVBoxLayout(right_panel)
+        latest_layout.setContentsMargins(0, 0, 0, 0)
+        
+        self.lbl_latest_title = QLabel("🔴 ประวัติล่าสุด (3 รายการ)")
+        self.lbl_latest_title.setStyleSheet("font-size: 18px; font-weight: bold;")
+        latest_layout.addWidget(self.lbl_latest_title)
+
+        # สร้างกล่องภาพและคำอธิบาย 3 ชุด
+        self.evidence_images = []
+        self.evidence_details = []
+
+        for i in range(3):
+            img_lbl = QLabel("รอข้อมูล...")
+            img_lbl.setAlignment(Qt.AlignCenter)
+            img_lbl.setFixedSize(320, 240)
+            img_lbl.setFrameShape(QFrame.Box)
             
-        cb_style = f"background-color: {card_bg}; color: {'white' if is_dark_mode else 'black'}; padding: 6px; border: 1px solid {border_color}; border-radius: 4px;"
-        self.combo_cam1.setStyleSheet(cb_style)
-        self.combo_cam2.setStyleSheet(cb_style)
-        
-        # บังคับรีเซ็ตสถานะธีมเพื่อให้วาดหน้าจอใหม่ถูกต้อง
-        self.cam1_status = None
-        self.cam2_status = None
+            detail_lbl = QLabel("-")
+            detail_lbl.setWordWrap(True)
+            detail_lbl.setStyleSheet("font-size: 14px;")
+            
+            latest_layout.addWidget(img_lbl)
+            latest_layout.addWidget(detail_lbl)
+            
+            self.evidence_images.append(img_lbl)
+            self.evidence_details.append(detail_lbl)
 
-    def update_active_cameras(self):
-        if self.camera_worker:
-            try:
-                idx1 = int(self.combo_cam1.currentText().split()[-1])
-                idx2 = int(self.combo_cam2.currentText().split()[-1])
-                self.camera_worker.set_active_cameras([idx1, idx2])
-            except Exception:
-                pass
+        latest_layout.addStretch()
+        content_layout.addWidget(right_panel, alignment=Qt.AlignRight | Qt.AlignTop) # บังคับชิดขวาบน
 
-    def update_frame(self, cam_index, cv_img):
+        main_layout.addLayout(content_layout, stretch=9)
+        self.set_theme(self.is_dark_theme)
+
+    def refresh_dashboard_data(self):
+        """ดึงสถิติและภาพ 3 ล่าสุดจากฐานข้อมูลมาอัปเดต"""
         try:
-            idx1 = int(self.combo_cam1.currentText().split()[-1])
-            idx2 = int(self.combo_cam2.currentText().split()[-1])
+            df = self.db.get_recent_alerts(limit=1000)
             
-            bg_color = '#0f172a' if self.is_dark_theme else '#e2e8f0'
-            border_color = '#334155' if self.is_dark_theme else '#cbd5e1'
-            fg_color = 'white' if self.is_dark_theme else 'black'
-            
-            # 🟢 กรณีกล้องดับ (ตรวจสอบ Cache เพื่อไม่ให้เขียนคำสั่งซ้ำรัวๆ)
-            if cv_img is None:
-                if cam_index == idx1 and self.cam1_status == "offline": return
-                if cam_index == idx2 and self.cam2_status == "offline": return
-                
-                offline_style = f"background-color: {bg_color}; color: #ef4444; font-weight: bold; font-size: 14px; border: 2px solid #ef4444; border-radius: 8px;"
-                if cam_index == idx1:
-                    self.cam1_status = "offline"
-                    self.lbl_video1.setPixmap(QPixmap())
-                    self.lbl_video1.setText(f"⚠️ Camera {cam_index}\n(Offline / No Signal)")
-                    self.lbl_video1.setStyleSheet(offline_style)
-                if cam_index == idx2:
-                    self.cam2_status = "offline"
-                    self.lbl_video2.setPixmap(QPixmap())
-                    self.lbl_video2.setText(f"⚠️ Camera {cam_index}\n(Offline / No Signal)")
-                    self.lbl_video2.setStyleSheet(offline_style)
+            if df.empty:
+                self.lbl_total_count.setText("0")
+                self.lbl_today_count.setText("0")
                 return
 
-            # กรณีกล้องติดปกติ
-            h, w, ch = cv_img.shape
-            bytes_per_line = ch * w
-            q_img = QImage(cv_img.data, w, h, bytes_per_line, QImage.Format_RGB888)
-            pixmap = QPixmap.fromImage(q_img)
+            # อัปเดตตัวเลขสถิติ
+            total_alerts = len(df)
+            df['timestamp'] = pd.to_datetime(df['timestamp'])
+            today_date = datetime.now().date()
+            today_alerts = len(df[df['timestamp'].dt.date == today_date])
             
-            if cam_index == idx1:
-                if self.cam1_status != "online":
-                    self.cam1_status = "online"
-                    self.lbl_video1.setText("")
-                    self.lbl_video1.setStyleSheet(f"background-color: {bg_color}; border: 2px solid {border_color}; border-radius: 8px;")
-                self.lbl_video1.setPixmap(pixmap)
-                
-            if cam_index == idx2:
-                if self.cam2_status != "online":
-                    self.cam2_status = "online"
-                    self.lbl_video2.setText("")
-                    self.lbl_video2.setStyleSheet(f"background-color: {bg_color}; border: 2px solid {border_color}; border-radius: 8px;")
-                self.lbl_video2.setPixmap(pixmap)
-        except Exception:
-            pass
+            self.lbl_total_count.setText(f"{total_alerts}")
+            self.lbl_today_count.setText(f"{today_alerts}")
+
+            # อัปเดตภาพ 3 รายการแรก
+            now = datetime.now()
+            display_count = min(3, len(df))
+
+            for i in range(3):
+                if i < display_count:
+                    alert = df.iloc[i]
+                    img_path = alert['image_path']
+                    cam_id = alert['camera_id']
+                    timestamp = alert['timestamp']
+
+                    time_diff = now - timestamp
+                    seconds = time_diff.total_seconds()
+                    if seconds < 60: time_ago = f"{int(seconds)} วิ"
+                    elif seconds < 3600: time_ago = f"{int(seconds // 60)} นาที"
+                    else: time_ago = f"{int(seconds // 3600)} ชม."
+
+                    detail_text = f"📹 {cam_id} | ⏰ {timestamp.strftime('%H:%M:%S')} ({time_ago}ที่แล้ว)"
+                    self.evidence_details[i].setText(detail_text)
+
+                    if img_path and os.path.exists(img_path):
+                        pixmap = QPixmap(img_path)
+                        scaled = pixmap.scaled(320, 240, Qt.KeepAspectRatio, Qt.SmoothTransformation)
+                        self.evidence_images[i].setPixmap(scaled)
+                    else:
+                        self.evidence_images[i].clear()
+                        self.evidence_images[i].setText("❌ ไม่พบไฟล์ภาพ")
+                else:
+                    self.evidence_images[i].clear()
+                    self.evidence_images[i].setText("-")
+                    self.evidence_details[i].setText("-")
+
+        except Exception as e:
+            print(f"Error refreshing dashboard: {e}")
+
+    def update_camera_frame(self, cam_idx, cv_img):
+        """รับภาพสดจากกล้องหลักมาวาดลงบนหน้า Dashboard"""
+        if cam_idx not in [0, 1]:
+            return
+            
+        target_lbl = self.lbl_cam1 if cam_idx == 0 else self.lbl_cam2
+
+        if cv_img is None:
+            if self.cam_statuses.get(cam_idx) == "offline": return
+            self.cam_statuses[cam_idx] = "offline"
+            target_lbl.clear()
+            target_lbl.setText(f"⚠️ กล้อง {cam_idx + 1} ขาดการเชื่อมต่อ")
+            target_lbl.setStyleSheet("background-color: black; color: white; border-radius: 6px;")
+            return
+
+        # เมื่อกล้องออนไลน์ ให้เคลียร์ข้อความและลบพื้นหลังดำทิ้ง
+        if self.cam_statuses.get(cam_idx) != "online":
+            self.cam_statuses[cam_idx] = "online"
+            target_lbl.setText("")
+            target_lbl.setStyleSheet("border-radius: 6px;")
+            
+        h, w, ch = cv_img.shape
+        bytes_per_line = ch * w
+        
+        # ดึงขนาดของกรอบรับภาพ
+        lbl_size = target_lbl.size()
+        
+        # 🟢 ล็อกภาพลง QImage ทันที
+        q_img = QImage(cv_img.tobytes(), w, h, bytes_per_line, QImage.Format_RGB888)
+        pixmap = QPixmap.fromImage(q_img)
+        
+        # เช็คว่ารูปไม่ว่างเปล่า และขนาดเลเบลพร้อมวาด
+        if not pixmap.isNull():
+            if lbl_size.width() > 10 and lbl_size.height() > 10:
+                pixmap = pixmap.scaled(lbl_size, Qt.KeepAspectRatio, Qt.SmoothTransformation)
+            target_lbl.setPixmap(pixmap)
+        """รับภาพสดจากกล้องหลักมาวาดลงบนหน้า Dashboard"""
+        if cam_idx not in [0, 1]:
+            return
+            
+        target_lbl = self.lbl_cam1 if cam_idx == 0 else self.lbl_cam2
+
+        if cv_img is None:
+            if self.cam_statuses.get(cam_idx) == "offline": return
+            self.cam_statuses[cam_idx] = "offline"
+            target_lbl.clear()
+            target_lbl.setText(f"⚠️ กล้อง {cam_idx + 1} ขาดการเชื่อมต่อ")
+            return
+
+        self.cam_statuses[cam_idx] = "online"
+        h, w, ch = cv_img.shape
+        bytes_per_line = ch * w
+        
+        lbl_size = target_lbl.size()
+        if lbl_size.width() <= 10 or lbl_size.height() <= 10:
+            from PySide6.QtCore import QSize
+            lbl_size = QSize(520, 380)
+            
+        # 🟢 แก้ไขบรรทัดนี้: ใช้ .tobytes() เพื่อบังคับให้ PySide6 ดึงภาพไปประมวลผลทันที ป้องกันจอดำ
+        q_img = QImage(cv_img.tobytes(), w, h, bytes_per_line, QImage.Format_RGB888)
+        pixmap = QPixmap.fromImage(q_img).scaled(lbl_size, Qt.KeepAspectRatio, Qt.SmoothTransformation)
+        target_lbl.setPixmap(pixmap)
+        """รับภาพสดจากกล้องหลักมาวาดลงบนหน้า Dashboard"""
+        # หน้า Dashboard ให้แสดงเฉพาะกล้องหลักตัวที่ 1 และ 2 เท่านั้น
+        if cam_idx not in [0, 1]:
+            return
+            
+        target_lbl = self.lbl_cam1 if cam_idx == 0 else self.lbl_cam2
+
+        if cv_img is None:
+            if self.cam_statuses.get(cam_idx) == "offline": return
+            self.cam_statuses[cam_idx] = "offline"
+            target_lbl.clear()
+            target_lbl.setText(f"⚠️ กล้อง {cam_idx + 1} ขาดการเชื่อมต่อ")
+            return
+
+        self.cam_statuses[cam_idx] = "online"
+        h, w, ch = cv_img.shape
+        bytes_per_line = ch * w
+        
+        # ป้องกันบั๊กขนาดเลเบลเป็น 0 ในจังหวะแรกที่เปิดโปรแกรม
+        lbl_size = target_lbl.size()
+        if lbl_size.width() <= 10 or lbl_size.height() <= 10:
+            from PySide6.QtCore import QSize
+            lbl_size = QSize(520, 380)
+            
+        q_img = QImage(cv_img.data, w, h, bytes_per_line, QImage.Format_RGB888)
+        pixmap = QPixmap.fromImage(q_img).scaled(lbl_size, Qt.KeepAspectRatio, Qt.SmoothTransformation)
+        target_lbl.setPixmap(pixmap)
+    def set_theme(self, is_dark_mode):
+        self.is_dark_theme = is_dark_mode
+        text_color = "white" if is_dark_mode else "black"
+        bg_color = "#1e293b" if is_dark_mode else "#ffffff"
+        border_color = "#334155" if is_dark_mode else "#e2e8f0"
+        img_bg = "#0f172a" if is_dark_mode else "#f8fafc"
+        sub_text_color = "#94a3b8" if is_dark_mode else "#475569"
+
+        card_style = f"background-color: {bg_color}; border: 1px solid {border_color}; border-radius: 8px;"
+        self.card_today.setStyleSheet(card_style)
+        self.card_total.setStyleSheet(card_style)
+
+        title_style = f"color: {text_color}; font-size: 16px; font-weight: bold;"
+        self.lbl_today_title.setStyleSheet(title_style)
+        self.lbl_total_title.setStyleSheet(title_style)
+        self.lbl_cam_title.setStyleSheet(title_style)
+        self.lbl_latest_title.setStyleSheet(title_style)
+        
+        for lbl in self.evidence_details:
+            lbl.setStyleSheet(f"color: {sub_text_color}; font-size: 14px; margin-bottom: 10px; font-weight: bold;")
+        
+        for img in self.evidence_images:
+            if not img.pixmap():
+                img.setStyleSheet(f"background-color: {img_bg}; color: {text_color}; border: 1px solid {border_color};")
