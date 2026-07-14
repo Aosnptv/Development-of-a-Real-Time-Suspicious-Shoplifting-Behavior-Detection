@@ -49,3 +49,5 @@ python-telegram-bot>=22.0
 # =========================== 555
 requests>=2.32.0
 
+pip install pynvml
+
