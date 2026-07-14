@@ -8,13 +8,13 @@ from ui.multi_cam_page import MultiCamPage
 from ui.playback_page import PlaybackPage  
 from ui.settings_page import SettingsPage  
 from services.camera_service import CameraWorker
+from PySide6.QtCore import Signal
 
 try:
     import psutil
 except ImportError:
     psutil = None
 
-# 🟢 พยายามดึงฟังก์ชันวัดการทำงานของการ์ดจอ (NVIDIA GPU Monitor)
 try:
     import pynvml
     pynvml.nvmlInit()
@@ -82,11 +82,22 @@ class MainWindow(QMainWindow):
         self.camera_worker = CameraWorker()
         self.camera_worker.start_camera()
         
+        # เชื่อมต่อภาพสตรีมหลักเข้าหน้า Dashboard
+        self.camera_worker.frame_ready.connect(self.update_dashboard_camera)
+        
         self.stacked_widget = QStackedWidget()
         self.page_dashboard = DashboardPage(self.camera_worker)
-        self.page_multicam = MultiCamPage(self.camera_worker)
-        self.page_playback = PlaybackPage()  
-        self.page_settings = SettingsPage()  
+
+        # 🟢 ผูกข้อมูลส่งไปให้หน้ามัลติแคมอ้างอิงผ่านตัวแม่เพื่อใช้ frame_ready
+        camera_dict = {}
+        if self.camera_worker is not None:
+            for idx in self.camera_worker.active_indices:
+                camera_dict[idx] = self.camera_worker
+            
+        self.page_multicam = MultiCamPage(camera_dict)
+        
+        self.page_playback = PlaybackPage()
+        self.page_settings = SettingsPage()
         
         self.stacked_widget.addWidget(self.page_dashboard)
         self.stacked_widget.addWidget(self.page_multicam)
@@ -151,7 +162,6 @@ class MainWindow(QMainWindow):
             fps_val = getattr(self.camera_worker, 'current_fps', 30)
             alert_count = getattr(self.page_dashboard, 'total_alerts', 0)
 
-            # 🟢 ดึงข้อมูลเปอร์เซ็นต์การทำงานของ GPU จริงออกมาใช้งาน
             gpu_p = "N/A"
             if HAS_GPU:
                 try:
@@ -161,15 +171,16 @@ class MainWindow(QMainWindow):
                 except Exception:
                     gpu_p = "Err"
 
-            # 🟢 เพิ่มการแสดงผลช่อง GPU: เข้าไปที่กล่องข้อความ
             self.lbl_metrics.setText(f"🖥️ CPU: {cpu_p}%\n💾 RAM: {ram_p}%\n🎮 GPU: {gpu_p}\n⚡ FPS: {fps_val}\n🚨 Alerts: {alert_count}")
             
-            # เช็คความร้อนขีดอันตราย
             is_danger = (alert_count > 0 or cpu_p > 85 or ram_p > 85 or (HAS_GPU and isinstance(gpu_p, int) and gpu_p > 85))
             color = "#ef4444" if is_danger else ("#4ade80" if self.is_dark_mode else "#16a34a")
             self.lbl_metrics.setStyleSheet(f"color: {color}; font-size: 12px; font-weight: bold; background: transparent; line-height: 140%;")
         else:
             self.lbl_metrics.setText("Metrics N/A")
+
+    def update_dashboard_camera(self, idx, frame):
+        self.page_dashboard.update_camera_frame(idx, frame)
 
     def closeEvent(self, event):
         self.camera_worker.stop_camera()
