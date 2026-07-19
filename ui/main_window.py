@@ -1,14 +1,14 @@
 import sys
 from PySide6.QtWidgets import QMainWindow, QWidget, QVBoxLayout, QHBoxLayout, QPushButton, QStackedWidget, QFrame, QLabel
-from PySide6.QtCore import Qt, QTimer, QDateTime
+from PySide6.QtCore import Qt, QTimer, QDateTime, Signal
 from PySide6.QtGui import QFont
 
 from ui.dashboard_page import DashboardPage
+from ui.incident_history_page import IncidentHistoryPage  # ✅ หน้าประวัติ (ฟีเจอร์ใหม่)
 from ui.multi_cam_page import MultiCamPage
 from ui.playback_page import PlaybackPage  
 from ui.settings_page import SettingsPage  
 from services.camera_service import CameraWorker
-from PySide6.QtCore import Signal
 
 try:
     import psutil
@@ -26,7 +26,7 @@ class MainWindow(QMainWindow):
     def __init__(self):
         super().__init__()
         self.setWindowTitle("Suspicious Behavior Detection System")
-        self.resize(1300, 780)
+        self.resize(1350, 850) # ปรับขนาดให้รองรับหน้าจอที่เพิ่มขึ้นเล็กน้อย
         
         self.is_dark_mode = True 
         central_widget = QWidget()
@@ -36,7 +36,9 @@ class MainWindow(QMainWindow):
         main_layout.setContentsMargins(0, 0, 0, 0)
         main_layout.setSpacing(0)
         
-        # SIDEBAR
+        # ==========================================
+        # 1. SIDEBAR (แถบเมนูด้านซ้าย)
+        # ==========================================
         self.sidebar = QFrame()
         self.sidebar.setMinimumWidth(240)
         self.sidebar.setMaximumWidth(240)
@@ -57,12 +59,22 @@ class MainWindow(QMainWindow):
         self.btn_theme.clicked.connect(self.toggle_theme)
         sidebar_layout.addWidget(self.btn_theme)
         
+        # สร้างปุ่มเมนู (เพิ่มปุ่ม History เข้าไปในกลุ่ม)
         self.btn_dashboard = QPushButton("📊 Dashboard")
+        self.btn_history = QPushButton("📋 Incident History") # ✅ แทรกเข้ามาตามสถาปัตยกรรม
         self.btn_multicam = QPushButton("📹 Multi-Cam Grid")
         self.btn_playback = QPushButton("⏪ Playback History")  
         self.btn_settings = QPushButton("⚙️ Settings")  
         
-        self.nav_buttons = [self.btn_dashboard, self.btn_multicam, self.btn_playback, self.btn_settings]
+        # จัดเรียงลำดับปุ่มในแถบนำทาง (Navigation Buttons)
+        self.nav_buttons = [
+            self.btn_dashboard, 
+            self.btn_history,    # Index 1
+            self.btn_multicam,   # Index 2
+            self.btn_playback,   # Index 3
+            self.btn_settings    # Index 4
+        ]
+        
         for btn in self.nav_buttons:
             btn.setCheckable(True)
             sidebar_layout.addWidget(btn)
@@ -70,6 +82,7 @@ class MainWindow(QMainWindow):
         self.btn_dashboard.setChecked(True)
         sidebar_layout.addStretch()
         
+        # กรอบแสดงสถานะเครื่อง (Metrics) ด้านล่างสุดของ Sidebar
         self.metrics_frame = QFrame()
         metrics_lay = QVBoxLayout(self.metrics_frame)
         self.lbl_metrics = QLabel("Loading Metrics...")
@@ -78,44 +91,73 @@ class MainWindow(QMainWindow):
         
         main_layout.addWidget(self.sidebar)
         
-        # WORKER & PAGES
+        # ==========================================
+        # 2. WORKER & CORE SERVICES
+        # ==========================================
         self.camera_worker = CameraWorker()
         self.camera_worker.start_camera()
         
-        # เชื่อมต่อภาพสตรีมหลักเข้าหน้า Dashboard
+        # เชื่อมต่อภาพสตรีมหลักเข้าหน้า Dashboard เดิม
         self.camera_worker.frame_ready.connect(self.update_dashboard_camera)
         
+        # ==========================================
+        # 3. PAGES REGISTRATION (ลงทะเบียนหน้าจอ)
+        # ==========================================
         self.stacked_widget = QStackedWidget()
+        
+        # สร้าง Instance ของแต่ละหน้า (คงรูปแบบการเรียก DashboardPage แบบเดิมของคุณไว้)
         self.page_dashboard = DashboardPage(self.camera_worker)
-
-        # 🟢 ผูกข้อมูลส่งไปให้หน้ามัลติแคมอ้างอิงผ่านตัวแม่เพื่อใช้ frame_ready
+        self.page_history = IncidentHistoryPage() # ✅ หน้าประวัติ (ฟีเจอร์ใหม่)
+        
+        # ผูกข้อมูลส่งไปให้หน้ามัลติแคมอ้างอิงผ่านตัวแม่ (คงของเดิมไว้)
         camera_dict = {}
         if self.camera_worker is not None:
             for idx in self.camera_worker.active_indices:
                 camera_dict[idx] = self.camera_worker
             
         self.page_multicam = MultiCamPage(camera_dict)
-        
         self.page_playback = PlaybackPage()
         self.page_settings = SettingsPage()
         
-        self.stacked_widget.addWidget(self.page_dashboard)
-        self.stacked_widget.addWidget(self.page_multicam)
-        self.stacked_widget.addWidget(self.page_playback) 
-        self.stacked_widget.addWidget(self.page_settings) 
+        # จัดเรียงตำแหน่งหน้าเข้า Stacked Widget (เรียงดัชนี Index 0-4)
+        self.stacked_widget.addWidget(self.page_dashboard)  # Index 0
+        self.stacked_widget.addWidget(self.page_history)    # Index 1 (แทรกใหม่)
+        self.stacked_widget.addWidget(self.page_multicam)   # Index 2
+        self.stacked_widget.addWidget(self.page_playback)   # Index 3
+        self.stacked_widget.addWidget(self.page_settings)   # Index 4
+        
         main_layout.addWidget(self.stacked_widget, stretch=1)
         
+        # ==========================================
+        # 4. SIGNALS & NAVIGATION CONNECTIONS
+        # ==========================================
+        # ผูกปุ่มกดเมนูกับการสลับหน้า
         self.btn_dashboard.clicked.connect(lambda: self._navigate_to(0, self.btn_dashboard))
-        self.btn_multicam.clicked.connect(lambda: self._navigate_to(1, self.btn_multicam))
-        self.btn_playback.clicked.connect(lambda: self._navigate_to(2, self.btn_playback))
-        self.btn_settings.clicked.connect(lambda: self._navigate_to(3, self.btn_settings))
+        self.btn_history.clicked.connect(lambda: [
+            self.page_history.load_data_from_db(), # ดึงข้อมูลล่าสุดจาก DB ทุกครั้งที่เปิดหน้านี้
+            self._navigate_to(1, self.btn_history)
+        ])
+        self.btn_multicam.clicked.connect(lambda: self._navigate_to(2, self.btn_multicam))
+        self.btn_playback.clicked.connect(lambda: self._navigate_to(3, self.btn_playback))
+        self.btn_settings.clicked.connect(lambda: self._navigate_to(4, self.btn_settings))
         
+        # ✅ เชื่อมสัญญาณตรวจจับพฤติกรรม (Incident) ไปอัปเดตหน้าประวัติแบบ Real-time
+        if hasattr(self.camera_worker, 'incident_triggered'):
+            self.camera_worker.incident_triggered.connect(self.page_history.load_data_from_db)
+            if hasattr(self.page_dashboard, 'refresh_dashboard_data'):
+                self.camera_worker.incident_triggered.connect(self.page_dashboard.refresh_dashboard_data)
+        
+        # ตั้งค่าตัวจับเวลาอัปเดต Metrics ระบบ
         self.sys_timer = QTimer()
         self.sys_timer.timeout.connect(self._update_system_stats)
         self.sys_timer.start(1000)
         
+        # บังคับใช้ Theme เริ่มต้น
         self.apply_theme()
 
+    # ==========================================
+    # 5. THEME & SYSTEM FUNCTIONS (ฟังก์ชันเดิมทั้งหมด)
+    # ==========================================
     def toggle_theme(self):
         self.is_dark_mode = not self.is_dark_mode
         self.apply_theme()
@@ -143,7 +185,10 @@ class MainWindow(QMainWindow):
 
         self.metrics_frame.setStyleSheet(f"background-color: {metrics_bg}; border: 1px solid {border}; border-radius: 6px;")
         
+        # ส่งสถานะ Theme ไปให้อัปเดตที่หน้าต่างย่อยทุกหน้า
         self.page_dashboard.set_theme(self.is_dark_mode)
+        if hasattr(self.page_history, 'set_theme'):
+            self.page_history.set_theme(self.is_dark_mode)
         self.page_multicam.set_theme(self.is_dark_mode)
         self.page_playback.set_theme(self.is_dark_mode)
         self.page_settings.set_theme(self.is_dark_mode)
@@ -183,7 +228,8 @@ class MainWindow(QMainWindow):
         self.page_dashboard.update_camera_frame(idx, frame)
 
     def closeEvent(self, event):
-        self.camera_worker.stop_camera()
+        if hasattr(self, 'camera_worker'):
+            self.camera_worker.stop_camera()
         if HAS_GPU:
             try: pynvml.nvmlShutdown()
             except Exception: pass

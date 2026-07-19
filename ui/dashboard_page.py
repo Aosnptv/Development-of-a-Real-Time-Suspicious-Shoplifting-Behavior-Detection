@@ -29,6 +29,102 @@ class DashboardPage(QWidget):
         main_layout.setSpacing(20)
 
         # ==========================================
+        # 1. แถวบน: การ์ดแสดงสถิติ (Alert วันนี้ / สถิติระบบ)
+        # ==========================================
+        stats_layout = QHBoxLayout()
+        
+        self.card_today = QFrame()
+        self.card_today.setFrameShape(QFrame.StyledPanel)
+        today_layout = QVBoxLayout(self.card_today)
+        self.lbl_today_title = QLabel("🚨 แจ้งเตือนวันนี้")
+        self.lbl_today_title.setAlignment(Qt.AlignCenter)
+        self.lbl_today_count = QLabel("0")
+        self.lbl_today_count.setAlignment(Qt.AlignCenter)
+        self.lbl_today_count.setStyleSheet("font-size: 36px; font-weight: bold; color: #ef4444;")
+        today_layout.addWidget(self.lbl_today_title)
+        today_layout.addWidget(self.lbl_today_count)
+
+        self.card_total = QFrame()
+        self.card_total.setFrameShape(QFrame.StyledPanel)
+        total_layout = QVBoxLayout(self.card_total)
+        self.lbl_total_title = QLabel("📁 แจ้งเตือนทั้งหมด")
+        self.lbl_total_title.setAlignment(Qt.AlignCenter)
+        self.lbl_total_count = QLabel("0")
+        self.lbl_total_count.setAlignment(Qt.AlignCenter)
+        self.lbl_total_count.setStyleSheet("font-size: 36px; font-weight: bold; color: #3b82f6;")
+        total_layout.addWidget(self.lbl_total_title)
+        total_layout.addWidget(self.lbl_total_count)
+
+        stats_layout.addWidget(self.card_today)
+        stats_layout.addWidget(self.card_total)
+        main_layout.addLayout(stats_layout, stretch=2)
+
+        # ==========================================
+        # 2. แถวล่าง: กล้องสด (ซ้าย) + ภาพหลักฐาน 3 รายการล่าสุด (ขวา)
+        # ==========================================
+        content_layout = QHBoxLayout()
+
+        # --- ฝั่งซ้าย: กล้องสดทั้ง 2 ตัวเต็มๆ จอ ---
+        cam_layout = QVBoxLayout()
+        self.lbl_cam_title = QLabel("📹 ระบบสตรีมมิ่งกล้องวงจรปิดสด (Live Camera)")
+        self.lbl_cam_title.setStyleSheet("font-size: 18px; font-weight: bold;")
+        cam_layout.addWidget(self.lbl_cam_title)
+        
+        self.lbl_cam1 = QLabel("รอสัญญาณกล้อง 1...")
+        self.lbl_cam1.setAlignment(Qt.AlignCenter)
+        self.lbl_cam1.setSizePolicy(QSizePolicy.Expanding, QSizePolicy.Expanding)
+        self.lbl_cam1.setStyleSheet("background-color: black; color: white; border-radius: 6px;")
+        
+        self.lbl_cam2 = QLabel("รอสัญญาณกล้อง 2...")
+        self.lbl_cam2.setAlignment(Qt.AlignCenter)
+        self.lbl_cam2.setSizePolicy(QSizePolicy.Expanding, QSizePolicy.Expanding)
+        self.lbl_cam2.setStyleSheet("background-color: black; color: white; border-radius: 6px;")
+
+        cam_layout.addWidget(self.lbl_cam1, stretch=1)
+        cam_layout.addWidget(self.lbl_cam2, stretch=1)
+        content_layout.addLayout(cam_layout, stretch=7)
+
+        # --- ฝั่งขวา: ภาพหลักฐาน 3 รายการล่าสุด ---
+        right_panel = QWidget()
+        right_panel.setFixedWidth(340)
+        latest_layout = QVBoxLayout(right_panel)
+        latest_layout.setContentsMargins(0, 0, 0, 0)
+        
+        self.lbl_latest_title = QLabel("🔴 แจ้งเตือนล่าสุด (3 รายการ)")
+        self.lbl_latest_title.setStyleSheet("font-size: 18px; font-weight: bold;")
+        latest_layout.addWidget(self.lbl_latest_title)
+
+        self.evidence_images = []
+        self.evidence_details = []
+
+        for i in range(3):
+            img_lbl = QLabel("รอข้อมูล...")
+            img_lbl.setAlignment(Qt.AlignCenter)
+            img_lbl.setFixedSize(320, 200)
+            img_lbl.setFrameShape(QFrame.Box)
+            
+            detail_lbl = QLabel("-")
+            detail_lbl.setWordWrap(True)
+            detail_lbl.setStyleSheet("font-size: 14px;")
+            
+            latest_layout.addWidget(img_lbl)
+            latest_layout.addWidget(detail_lbl)
+            
+            self.evidence_images.append(img_lbl)
+            self.evidence_details.append(detail_lbl)
+
+        latest_layout.addStretch()
+        content_layout.addWidget(right_panel, alignment=Qt.AlignRight | Qt.AlignTop)
+        main_layout.addLayout(content_layout, stretch=8) # ให้กินพื้นที่ลงไปด้านล่างได้เต็มที่
+
+        self.set_theme(self.is_dark_theme)
+        
+    # ลบฟังก์ชัน load_incident_history ในไฟล์นี้ออกไปได้เลยครับ เพราะแยกไปหน้าใหม่แล้ว
+        main_layout = QVBoxLayout(self)
+        main_layout.setContentsMargins(20, 20, 20, 20)
+        main_layout.setSpacing(20)
+
+        # ==========================================
         # 1. แถวบน: การ์ดแสดงสถิติ
         # ==========================================
         stats_layout = QHBoxLayout()
