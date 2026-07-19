@@ -1,5 +1,5 @@
 import os
-from services.telegram_service import TelegramService
+from services.notification_service import TelegramService
 
 def simulate_shoplifting_detection():
     print("=== เริ่มการทดสอบระบบแจ้งเตือน Telegram ===")

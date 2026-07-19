@@ -2,16 +2,21 @@ import cv2
 from PySide6.QtCore import QThread, Signal
 import time
 import threading
+import os
 from services.config_service import ConfigManager
 from services.logger_service import get_logger
 from services.ai_service import AIService
+from services.fsm_service import FSMService
+from services.database_service import DatabaseService
+from services.notification_service import NotificationService
 
 class SubCameraWorker(threading.Thread):
-    def __init__(self, idx, status_callback, frame_callback):
+    def __init__(self, idx, status_callback, frame_callback, incident_callback):
         super().__init__()
         self.idx = idx
         self.status_callback = status_callback
         self.frame_callback = frame_callback
+        self.incident_callback = incident_callback  # ✅ เก็บค่าไว้ใช้งานในการอัปเดตตาราง UI ล่าสุด
         self.running = False
         self.cap = None
         self.current_fps = 0
@@ -19,12 +24,58 @@ class SubCameraWorker(threading.Thread):
         self.last_fps_time = time.time()
         self.daemon = True 
         
-        # โหลด AI Service ตามปกติ
+        # สำหรับเก็บภาพ BGR ดั้งเดิมไว้บันทึกเป็นหลักฐานตอนแจ้งเตือน
+        self.current_bgr_frame = None
+        
+        # โหลด AI Service, FSM สมองกล ระบบฐานข้อมูล และระบบแจ้งเตือนประจำตัวกล้อง
         try:
             self.ai = AIService()
+            self.fsm = FSMService(alert_callback=self.trigger_shoplifting_alert)
+            self.db = DatabaseService()
+            self.notifier = NotificationService()  # ✅ เปิดใช้งานระบบแจ้งเตือน Telegram สำเร็จ
+            self.shelf_roi = (100, 200, 500, 600)  # พิกัดพื้นที่ชั้นวางสินค้าสมมุติ
         except Exception as e:
             self.ai = None
-            print(f"ไม่สามารถโหลด AI สำหรับกล้อง {self.idx} ได้: {e}")
+            self.fsm = None
+            self.db = None
+            self.notifier = None
+            print(f"ไม่สามารถโหลดระบบ AI/FSM/DB/Notification สำหรับกล้อง {self.idx} ได้: {e}")
+
+    def trigger_shoplifting_alert(self, person_id, bbox):
+        """ฟังก์ชันทำงานอัตโนมัติเมื่อ FSM ตรวจพบพฤติกรรมต้องสงสัยขโมยของ (S5)"""
+        print(f"🚨 [กล้องที่ {self.idx}] ตรวจพบพฤติกรรมต้องสงสัย! (Person ID: {person_id})")
+        
+        if self.current_bgr_frame is not None:
+            try:
+                # 1. สร้างโฟลเดอร์สำหรับเก็บภาพหลักฐานหากยังไม่มีในเครื่อง
+                os.makedirs("evidence", exist_ok=True)
+                
+                # 2. ตั้งชื่อไฟล์ด้วย วันเวลา_หมายเลขกล้อง_หมายเลขบุคคล
+                timestamp = time.strftime("%Y%m%d_%H%M%S")
+                image_name = f"evidence/cam_{self.idx}_pid_{person_id}_{timestamp}.jpg"
+                
+                # 3. บันทึกไฟล์ภาพดิบลงดิสก์คอมพิวเตอร์ก่อน เพื่อให้มีไฟล์อยู่จริงพร้อมส่งต่อ
+                cv2.imwrite(image_name, self.current_bgr_frame)
+                print(f"📸 บันทึกภาพถ่ายหลักฐานสำเร็จ: {image_name}")
+                
+                # 4. เขียนต่อท้ายหลังจากบันทึก SQLite สำเร็จ
+                if getattr(self, 'db', None):
+                    success = self.db.add_incident(camera_id=self.idx, person_id=person_id, image_path=image_name)
+                    if success:
+                        print(f"💾 บันทึก Log เหตุการณ์ลงฐานข้อมูล SQLite เรียบร้อย!")
+                        # ✅ ยิงสัญญาณส่งกลับไปบอกหน้าต่างหลัก UI ให้โหลดดึงตารางใหม่มาแสดงผลสดๆ
+                        if self.incident_callback:
+                            self.incident_callback()
+                
+                # 5. สั่งยิงภาพหลักฐานเข้ามือถือผ่าน Telegram ทันทีแบบจังหวะ Real-time Background Thread
+                if getattr(self, 'notifier', None):
+                    self.notifier.send_alert(
+                        camera_id=self.idx, 
+                        person_id=person_id, 
+                        image_path=image_name
+                    )
+            except Exception as e:
+                print(f"⚠️ เกิดข้อผิดพลาดในการบันทึกหลักฐานหรือแจ้งเตือน: {e}")
 
     def run(self):
         self.running = True
@@ -65,13 +116,20 @@ class SubCameraWorker(threading.Thread):
             if ret and frame is not None:
                 self.status_callback(self.idx, True)
                 
+                # เก็บสำเนาภาพ BGR สีปกติเอาไว้ก่อนนำไปตัดขนาดหรือแปลงสีเพื่อรัน AI
+                self.current_bgr_frame = frame.copy()
+                
                 try:
                     frame = cv2.resize(frame, (640, 480))
                     frame = cv2.cvtColor(frame, cv2.COLOR_BGR2RGB)
                     
-                    # 🛑 เราปิด AI ไว้ก่อนจนกว่าภาพเพียวๆ จะแสดงบนจอสำเร็จ
-                    # if self.ai:
-                    #     results = self.ai.predict(frame) 
+                    # เปิดใช้งานการตรวจจับและแทร็กวัตถุร่วมกับสมองกล FSM
+                    if getattr(self, 'ai', None):
+                        frame = self.ai.predict(frame) 
+                        
+                        # ส่งข้อมูลตำแหน่งวัตถุล่าสุดให้ FSM วิเคราะห์พฤติกรรมในแต่ละเฟรม
+                        if getattr(self, 'fsm', None):
+                            self.fsm.update(self.ai.latest_tracking_data, self.shelf_roi)
                     
                     if self.running:
                         self.frame_callback(self.idx, frame)
@@ -103,6 +161,8 @@ class SubCameraWorker(threading.Thread):
 class CameraWorker(QThread):
     frame_ready = Signal(int, object)
     info_updated = Signal(int, str, float, int, int) 
+    # ✅ สัญญาณหลักสำหรับเชื่อมโยงไปสั่งให้ UI หน้า Dashboard รีโหลดตารางประวัติใหม่
+    incident_triggered = Signal()
     
     def __init__(self):
         super().__init__()
@@ -114,7 +174,8 @@ class CameraWorker(QThread):
         self.active_indices = indices
         for idx in self.active_indices:
             if idx not in self.sub_workers:
-                worker = SubCameraWorker(idx, self._update_status, self._handle_frame)
+                # ✅ ส่งตัวยิงสัญญาณเสี่ยงภัยผูกเข้าไปที่ลูกทีมย่อยเพื่อส่งสัญญาณข้าม Thread ได้อย่างปลอดภัย
+                worker = SubCameraWorker(idx, self._update_status, self._handle_frame, self.incident_triggered.emit)
                 self.sub_workers[idx] = worker
                 worker.start()
                 
@@ -165,13 +226,13 @@ class CameraWorker(QThread):
 
 
 # ==========================================
-# ส่วนทดสอบระบบ (เรียกใช้โดยตรง)
+# ส่วนทดสอบระบบ (เรียกใช้โดยตรงสำหรับ Debug)
 # ==========================================
 logger = get_logger("CameraService")
 config = ConfigManager()
 
 def start_camera_test():
-    """ฟังก์ชันสำหรับเทสต์ระบบกล้องแยกต่างหาก (เผื่อเอาไว้รัน Debug)"""
+    """ฟังก์ชันสำหรับเทสต์ระบบกล้องแยกต่างหาก"""
     try:
         cam_1_url = config.get("camera.cam_1")
         logger.info(f"กำลังทดสอบเชื่อมต่อกล้อง: {cam_1_url}")
