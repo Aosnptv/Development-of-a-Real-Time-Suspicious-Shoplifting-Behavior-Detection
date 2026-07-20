@@ -1,6 +1,8 @@
+# ui/dashboard_page.py
 import os
 import cv2
 import pandas as pd
+import numpy as np  # 🟢 จุดสำคัญ: เพิ่มเข้ามาเพื่อรองรับคำสั่ง np.ascontiguousarray
 from datetime import datetime
 from PySide6.QtWidgets import QWidget, QVBoxLayout, QHBoxLayout, QLabel, QFrame, QSizePolicy
 from PySide6.QtCore import Qt, QTimer, QSize
@@ -175,7 +177,7 @@ class DashboardPage(QWidget):
             print(f"❌ Error refreshing dashboard: {e}")
 
     def update_camera_frame(self, cam_idx, cv_img):
-        """รับสัญญาณภาพวิดีโอสด และแสดงผลลัพธ์บน UI อย่างถูกต้องตามฟอร์แมตสีดิบ"""
+        """รับสัญญาณภาพวิดีโอสด และแสดงผลลัพธ์บน UI อย่างถูกต้อง"""
         if cam_idx not in [0, 1]:
             return
             
@@ -193,6 +195,8 @@ class DashboardPage(QWidget):
         self.cam_statuses[cam_idx] = "online"
         
         try:
+            # บังคับให้จัดเรียง Array ป้องกันปัญหาภาพหายหรือเบลอใน PySide6
+            cv_img = np.ascontiguousarray(cv_img)
             h, w, ch = cv_img.shape
             bytes_per_line = ch * w
             
@@ -200,10 +204,8 @@ class DashboardPage(QWidget):
             if lbl_size.width() <= 10 or lbl_size.height() <= 10:
                 lbl_size = QSize(520, 350)
                 
-            # 🟢 แก้ไขจุดสำคัญตรงนี้: นำข้อมูล cv_img.data ส่งเข้าฟอร์แมต Format_RGB888 โดยตรง 
-            # ไม่ต้องผ่านฟังก์ชัน cv2.cvtColor แต่อย่างใด สีของกล้องจะกลับมาถูกต้องทันทีครับ
-            q_img = QImage(cv_img.data, w, h, bytes_per_line, QImage.Format_RGB888).copy()
-            pixmap = QPixmap.fromImage(q_img).scaled(lbl_size, Qt.KeepAspectRatio, Qt.SmoothTransformation)
+            q_img = QImage(cv_img.data, w, h, bytes_per_line, QImage.Format_RGB888)
+            pixmap = QPixmap.fromImage(q_img.copy()).scaled(lbl_size, Qt.KeepAspectRatio, Qt.SmoothTransformation)
             
             target_lbl.setPixmap(pixmap)
         except Exception as e:

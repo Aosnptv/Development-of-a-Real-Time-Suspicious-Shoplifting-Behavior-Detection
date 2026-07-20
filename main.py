@@ -6,7 +6,7 @@ from ui.main_window import MainWindow
 def main():
     app = QApplication(sys.argv)
     
-    # สั่งสร้างหน้าต่างหลักของโปรเจกต์
+    # สั่งสร้างหน้าต่างหลักของโปรเจกต์จากคลาสที่อยู่ในโฟลเดอร์ ui
     window = MainWindow()
     window.show()
     
