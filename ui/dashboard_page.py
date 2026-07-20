@@ -175,7 +175,7 @@ class DashboardPage(QWidget):
             print(f"❌ Error refreshing dashboard: {e}")
 
     def update_camera_frame(self, cam_idx, cv_img):
-        """รับสัญญาณภาพวิดีโอสด จัดการฟอร์แมตสี BGR และแสดงผลลัพธ์บน UI อย่างถูกต้อง"""
+        """รับสัญญาณภาพวิดีโอสด และแสดงผลลัพธ์บน UI อย่างถูกต้องตามฟอร์แมตสีดิบ"""
         if cam_idx not in [0, 1]:
             return
             
@@ -200,8 +200,9 @@ class DashboardPage(QWidget):
             if lbl_size.width() <= 10 or lbl_size.height() <= 10:
                 lbl_size = QSize(520, 350)
                 
-            # 🟢 ปรับเปลี่ยนตรงนี้: ใช้ Format_BGR888 เพื่อแมปอาเรย์สีดิบจาก OpenCV ให้แสดงผลสีธรรมชาติ ไม่เพี้ยน
-            q_img = QImage(cv_img.data, w, h, bytes_per_line, QImage.Format_BGR888).copy()
+            # 🟢 แก้ไขจุดสำคัญตรงนี้: นำข้อมูล cv_img.data ส่งเข้าฟอร์แมต Format_RGB888 โดยตรง 
+            # ไม่ต้องผ่านฟังก์ชัน cv2.cvtColor แต่อย่างใด สีของกล้องจะกลับมาถูกต้องทันทีครับ
+            q_img = QImage(cv_img.data, w, h, bytes_per_line, QImage.Format_RGB888).copy()
             pixmap = QPixmap.fromImage(q_img).scaled(lbl_size, Qt.KeepAspectRatio, Qt.SmoothTransformation)
             
             target_lbl.setPixmap(pixmap)
