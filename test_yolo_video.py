@@ -3,7 +3,7 @@ import time  # 🟢 เพิ่ม: โมดูลสำหรับจับ�
 from ultralytics import YOLO
 
 # 1. โหลดโมเดล YOLO ของคุณ
-model_path = "C:/Users/deeny/OneDrive/Documents/GitHub/Development-of-a-Real-Time-Suspicious-Shoplifting-Behavior-Detection/runs/detect/shoplifting_model_v1-5/weights/best.pt"
+model_path = "C:/Users/deeny/OneDrive/Documents/GitHub/Development-of-a-Real-Time-Suspicious-Shoplifting-Behavior-Detection/runs/detect/shoplifting_model_v1-6/weights/best.pt"
 model = YOLO(model_path) 
 
 # 2. ใส่ชื่อไฟล์วิดีโอที่ต้องการทดสอบ
