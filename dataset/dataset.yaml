@@ -7,7 +7,7 @@ val: dataset/images/valid    # 🟢 เติม dataset/ เข้าไป
 nc: 4
 
 names:
-  0: hand
-  1: basket
+  0: basket
+  1: hand
   2: person
   3: product

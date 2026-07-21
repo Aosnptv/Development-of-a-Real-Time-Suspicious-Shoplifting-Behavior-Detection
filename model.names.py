@@ -6,34 +6,42 @@ from ultralytics import YOLO
 model_path = "models/services/shoplifting_yolov8.pt"
 model = YOLO(model_path)
 
-# 🟢 กำหนด Dictionary สลับชื่อ Class ให้ถูกต้อง
+# 🔍 1. สั่งพิมพ์เพื่อดู Index ที่แท้จริงของโมเดลบน Terminal/PowerShell
+print("--------------------------------------------------")
+print("📌 Class ID เดิมที่ฝังอยู่ในไฟล์ .pt คือ:")
+print(model.names)
+print("--------------------------------------------------")
+
+# 🟢 2. กำหนด Dictionary สลับชื่อ Class ให้ถูกต้อง
+# (ให้ดูผลลัพธ์จาก print ด้านบน แล้วปรับเลข Index 0, 1, 2, 3... ให้ตรงกับชื่อที่ถูกต้อง)
 custom_names = {
-    0: 'hand',    # สลับ ID 0 เป็น hand
-    1: 'basket',  # สลับ ID 1 เป็น basket
-    2: 'person',  # ปกติ
-    3: 'product'  # ปกติ
+    0: 'person',
+    1: 'basket',  # 👈 กำหนด Index ของ basket ให้ถูกต้อง
+    2: 'hand',    # 👈 กำหนด Index ของ hand ให้ถูกต้อง
+    3: 'product'  # 👈 (ใส่ Class อื่นๆ ที่มีให้ครบตามโมเดลของคุณ)
 }
 
-# อัปเดตไปยังตัวโมเดลด้านใน (ถ้าทำได้)
-if hasattr(model, 'model') and model.model is not None:
+# อัปเดตชื่อ Class เข้าไปในโมเดล
+model.names = custom_names
+if hasattr(model, 'model') and hasattr(model.model, 'names'):
     model.model.names = custom_names
 
 # 2. ใส่ชื่อไฟล์วิดีโอที่ต้องการทดสอบ
-video_path = "C:/Users/deeny/Videos/AI/pick_ (7).mp4" 
+video_path = "C:/Users/deeny/Videos/AI/pick_ (10).mp4" 
 cap = cv2.VideoCapture(video_path)
 
 if not cap.isOpened():
     print("❌ ไม่สามารถเปิดไฟล์วิดีโอได้ กรุณาตรวจสอบ Path ไฟล์")
     exit()
 
-# กำหนดความเร็วที่ต้องการให้เล่น (60 FPS)
+# 🟢 กำหนดค่าเป้าหมาย: ความเร็วที่ต้องการให้เล่น (60 FPS)
 TARGET_FPS = 60
 TIME_PER_FRAME = 1.0 / TARGET_FPS
 
 print(f"🚀 เริ่มต้นการทดสอบ... ล็อกความเร็วที่ประมาณ {TARGET_FPS} FPS")
 print("กรุณากด 'q' เพื่อเลิกทำงาน")
 
-# กำหนดชื่อหน้าต่างและปรับขนาด
+# กำหนดชื่อหน้าต่างและทำให้สามารถปรับขนาดได้ (Resizable Window)
 window_name = "shoplifting"
 cv2.namedWindow(window_name, cv2.WINDOW_NORMAL) 
 cv2.resizeWindow(window_name, 1280, 720) 
@@ -50,16 +58,13 @@ while cap.isOpened():
     # 3. ให้ YOLO ตรวจจับวัตถุในเฟรม
     results = model(frame) 
 
-    # 🟢 [จุดสำคัญ] บังคับเปลี่ยนชื่อ Class ในผลลัพธ์เฟรมนี้ก่อนสั่ง plot()
-    results[0].names = custom_names
-
-    # 4. วาด Bounding Box ผลลัพธ์ลงบนภาพ
+    # 4. วาด Bounding Box ผลลัพธ์การตรวจจับลงบนภาพ
     annotated_frame = results[0].plot()
 
     # 5. แสดงผลบนหน้าจอ
     cv2.imshow(window_name, annotated_frame)
 
-    # ควบคุม FPS ให้คงที่
+    # 🟢 ควบคุม FPS ให้แม่นยำ
     process_time = time.time() - start_time
     delay_time = max(0.001, TIME_PER_FRAME - process_time)
     time.sleep(delay_time)
