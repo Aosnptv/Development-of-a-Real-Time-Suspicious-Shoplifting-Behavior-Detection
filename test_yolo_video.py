@@ -3,11 +3,11 @@ import time  # 🟢 เพิ่ม: โมดูลสำหรับจับ�
 from ultralytics import YOLO
 
 # 1. โหลดโมเดล YOLO ของคุณ
-model_path = "C:/Users/deeny/OneDrive/Documents/GitHub/Development-of-a-Real-Time-Suspicious-Shoplifting-Behavior-Detection/runs/detect/shoplifting_model_v1-6/weights/best.pt"
+model_path = "models/services/shoplifting_yolov8.pt"
 model = YOLO(model_path) 
 
 # 2. ใส่ชื่อไฟล์วิดีโอที่ต้องการทดสอบ
-video_path = "C:/Users/deeny/Videos/AI/walk2.mp4" 
+video_path = "C:/Users/deeny/Videos/AI/pick_ (10).mp4" 
 cap = cv2.VideoCapture(video_path)
 
 if not cap.isOpened():

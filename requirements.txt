@@ -22,3 +22,4 @@ pyqtgraph==0.14.0               # ใช้สำหรับวาดกรา�
 pip uninstall pynvml -y
 pip install nvidia-ml-py
 pip install requests
+install roboflow
