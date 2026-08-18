@@ -1,13 +1,16 @@
-PySide6==6.11.1 
-PySide6_Essentials==6.11.1 
-PySide6_Addons==6.11.1 
-ultralytics==8.4.76 
-opencv-python==4.13.0.90 
-opencv-contrib-python==4.13.0.90 
-numpy==2.5.1 
-roboflow 
-psutil==7.2.2 
-nvidia-ml-py==13.610.43 
-pandas==3.0.3 
-pyqtgraph==0.14.0 
-requests 
+echo PySide6==6.11.1 > requirements.txt
+echo PySide6_Essentials==6.11.1 >> requirements.txt
+echo PySide6_Addons==6.11.1 >> requirements.txt
+echo ultralytics==8.4.76 >> requirements.txt
+echo opencv-python==4.13.0.90 >> requirements.txt
+echo opencv-contrib-python==4.13.0.90 >> requirements.txt
+echo numpy==2.5.1 >> requirements.txt
+echo roboflow >> requirements.txt
+echo psutil==7.2.2 >> requirements.txt
+echo nvidia-ml-py==13.610.43 >> requirements.txt
+echo pandas==3.0.3 >> requirements.txt
+echo pyqtgraph==0.14.0 >> requirements.txt
+echo requests >> requirements.txt
+
+#pip install -r requirements.txt
+#python -c "import PySide6, ultralytics, cv2, numpy, roboflow, psutil, pynvml, pandas, pyqtgraph, requests; print('\n✅ ติดตั้งครบถ้วนและพร้อมใช้งานทุกตัว!')"
